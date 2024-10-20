@@ -55,7 +55,7 @@ FF_QUESTION   := A_ScriptDir "\Icon\FF_Question.png"
 
 ; Add Color Scheme
 CustomMsgBox.AddColorScheme("Error", "FF0000", "FFFFFF", "d46666")
-CustomMsgBox.AddColorScheme("Success", "d4edda", "155724", "28a745")
+CustomMsgBox.AddColorScheme("Success", "E8F5E9", "1B5E20", "4CAF50")
 
 TraySetIcon (FF_CREATION)
 
@@ -216,12 +216,21 @@ CreateInSelectedFolders(*) {
     }
 
     if (selectedFolders.Length == 0) {
-        MsgBox("Please select at least one folder to create.", "Select Folders", "T1 16")
+        TraySetIcon (FF_ERROR)
+        msg := CustomMsgBox()
+        msg.SetText("selectedFolders.Length", "Please select at least one folder to create.")
+        msg.SetPosition(window_width + 240, window_height + 118)
+        msg.SetColorScheme("Error")
+        msg.SetOptions("ToolWindow", "AlwaysOnTop")
+        msg.SetCloseTimer(1)
+        msg.Show()
+        ; MsgBox("Please select at least one folder to create.", "Select Folders", "T1 16")
+        TraySetIcon (FF_CREATION)
         return
     }
 
     ; Ask the user where to create the folders
-    selectedPath := FileSelect("DM", A_Desktop, "Select where to create the folders")
+    selectedPath := FileSelect("D", A_Desktop, "Select where to create the folders")
 
     if (selectedPath != "") {
         createdFolders := []
@@ -255,11 +264,10 @@ CreateInSelectedFolders(*) {
         TraySetIcon (FF_INFO)
         msg := CustomMsgBox()
         msg.SetText("Created F&F", resultMsg)
-        msg.SetPosition(window_width, window_height)
+        msg.SetPosition("center", "center")
         msg.SetColorScheme("Success")
         msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetAppearance(8)
-        ; msg.SetCloseTimer(0.25)
+        msg.SetCloseTimer(2)
         msg.Show()
         ; MsgBox(resultMsg, "Created F&F", "T0.5 64")
         TraySetIcon (FF_CREATION)
@@ -269,7 +277,16 @@ CreateInSelectedFolders(*) {
         ExitApp()
     }
     else {
-        MsgBox("Folder creation cancelled.", "Operation Cancelled", "T0.5 16")
+        TraySetIcon (FF_ERROR)
+        msg := CustomMsgBox()
+        msg.SetText("selectedPath", "Folder creation cancelled.")
+        msg.SetPosition(window_width + 240, window_height + 118)
+        msg.SetColorScheme("Error")
+        msg.SetOptions("ToolWindow", "AlwaysOnTop")
+        msg.SetCloseTimer(1)
+        msg.Show()
+        ; MsgBox("Folder creation cancelled.", "Operation Cancelled", "T0.5 16")
+        TraySetIcon (FF_CREATION)
         ExitApp()
     }
 
@@ -392,10 +409,10 @@ CreatePureRefFile(dirPath) {
         TraySetIcon (FF_INFO)
         msg := CustomMsgBox()
         msg.SetText("CreatePureRefFile", "File created: " filePath "Successfully.")
-        msg.SetPosition(window_width + 240, window_height + 118)
+        msg.SetPosition(window_width + 80, window_height + 118)
         msg.SetColorScheme("Success")
         msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(1)
+        msg.SetCloseTimer(0.5)
         msg.Show()
         ; MsgBox("File created: " filePath, "Success", "T1 64")
         TraySetIcon (FF_CREATION)

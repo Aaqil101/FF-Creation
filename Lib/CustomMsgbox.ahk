@@ -3,8 +3,8 @@
  * @license WTFPL
  * @file CustomMsgbox.ahk
  * @author Aaqil Ilyas
- * @link ()
- * @date 2024-10-17
+ * @link (https://github.com/Aaqil101/Custom-Libraries/tree/master/Custom%20Msgbox)
+ * @created on 2024-10-17
  * @version 2.1.0
  * @copyright 2024 Aaqil Ilyas
  **************************************************************************/
@@ -219,6 +219,8 @@ class CustomMsgBox {
     /**
      * Method to set font styles
      * @param {Array} options - List of font style options
+     * @example
+     * SetFontStyle(["bold", "italic"])
      * @returns {CustomMsgBox} - This object for method chaining
      */
     SetFontStyle(options*) {
