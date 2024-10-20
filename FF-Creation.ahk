@@ -44,14 +44,17 @@ SetDefaultMouseSpeed 0
 #Include Lib\CursorHandler.ahk
 #Include Lib\CustomMsgbox.ahk
 
-WINDOW_WIDTH  := 250
-WINDOW_HEIGHT := 280
-CS_MSGBOX     := A_ScriptDir "\Icon\CS_Msgbox.png"
-FF_CREATION   := A_ScriptDir "\Icon\FF_Creation.png"
-FF_ERROR      := A_ScriptDir "\Icon\FF_Error.png"
-FF_STOP       := A_ScriptDir "\Icon\FF_Stop.png"
-FF_INFO       := A_ScriptDir "\Icon\FF_Info.png"
-FF_QUESTION   := A_ScriptDir "\Icon\FF_Question.png"
+WINDOW_WIDTH        :=  250
+WINDOW_HEIGHT       :=  280
+CS_MSGBOX           :=  A_ScriptDir "\Lib\Icons\CS_Msgbox.png"
+FF_CREATION         :=  A_ScriptDir "\Lib\Icons\FF_Creation.png"
+FF_ERROR            :=  A_ScriptDir "\Lib\Icons\FF_Error.png"
+FF_STOP             :=  A_ScriptDir "\Lib\Icons\FF_Stop.png"
+FF_INFO             :=  A_ScriptDir "\Lib\Icons\FF_Info.png"
+FF_QUESTION         :=  A_ScriptDir "\Lib\Icons\FF_Question.png"
+POST_PROCESSING     :=  A_ScriptDir "\Lib\Sources\post-processing.blend"
+REFERENCE_FILE      :=  A_ScriptDir "\Lib\Sources\NewScene.pur"
+BLEND_FILE          :=  A_ScriptDir "\Lib\Sources\NewBlenderProjects.blend"
 
 ; Add Color Scheme
 CustomMsgBox.AddColorScheme("Error", "FF0000", "FFFFFF", "d46666")
@@ -205,6 +208,7 @@ CreateInSelectedFolders(*) {
     selectedFolders := []
     createPureRef := false
     createpostproc := false
+    createBlend := false
 
     ; Collect selected folders
     for index, folder in folders {
@@ -214,20 +218,9 @@ CreateInSelectedFolders(*) {
                 createPureRef := true
             if (folder.name == "d_postproc")
                 createpostproc := true
+            if (folder.name == "a_blend")
+                createBlend := true
         }
-        /* if (bFiles["Folder" index].Value) {
-            if (bFiles["Folder" index].Value)
-            {
-                selectedFolders.Push(folder.name)
-                if (folder.name == "b_ref")
-                    createPureRef := true
-            }
-            if (bFiles["Folder" index].Value)
-            {
-                selectedFolders.Push(folder.name)
-                if (folder.name == "d_postproc")
-                    createpostproc := true
-            } */
     }
 
     if (selectedFolders.Length == 0) {
@@ -268,6 +261,16 @@ CreateInSelectedFolders(*) {
             CreatePureRefFile(selectedPath "\b_ref")
         }
 
+        ; Create postproc file if d_postproc was selected
+        if (createpostproc) {
+            CreatePostProcessingFile(selectedPath "\d_postproc")
+        }
+
+        ; Create blend file if a_blend was selected
+        if (createBlend) {
+            CreateNewBlendFile(selectedPath "\a_blend")
+        }
+
         ; Prepare result message
         resultMsg := "Results:`n`n"
         if (createdFolders.Length > 0)
@@ -291,6 +294,7 @@ CreateInSelectedFolders(*) {
         ; Terminate the script
         ExitApp()
     }
+    /*
     else {
         TraySetIcon (FF_ERROR)
         msg := CustomMsgBox()
@@ -304,9 +308,7 @@ CreateInSelectedFolders(*) {
         TraySetIcon (FF_CREATION)
         ExitApp()
     }
-
-    ; Destroy the bFiles object to free up any resources it may have allocated.
-    bFiles.Destroy()
+    */
 }
 
 ; Create in custom paths
@@ -317,6 +319,7 @@ CreateInCustomPaths(*) {
     selectedFolders := []
     createPureRef := false
     createpostproc := false
+    createBlend := false
 
     ; Collect selected folders
     for index, folder in folders {
@@ -326,6 +329,8 @@ CreateInCustomPaths(*) {
                 createPureRef := true
             if (folder.name == "d_postproc")
                 createpostproc := true
+            if (folder.name == "a_blend")
+                createBlend := true
         }
     }
 
@@ -379,6 +384,16 @@ CreateInCustomPaths(*) {
                     if (folder == "b_ref" && createPureRef) {
                         CreatePureRefFile(fullPath)
                     }
+
+                    ; Create postproc file if d_postproc was selected
+                    if (folder == "d_postproc" && createpostproc) {
+                        CreatePostProcessingFile(fullPath)
+                    }
+
+                    ; Create blend file if a_blend was selected
+                    if (folder == "a_blend" && createBlend) {
+                        CreateNewBlendFile(fullPath)
+                    }
                 }
                 catch as err {
                     errors.Push("Error creating " fullPath ": " err.Message)
@@ -400,65 +415,179 @@ CreateInCustomPaths(*) {
     ExitApp()
 }
 
-CreatePureRefFile(dirPath) {
-    ; Prompt the user to enter a name for the PureRef reference file
-    refName := InputBox("Please enter a PureRef Name.", "Reference File Name", "y720 w250 h100")
-    if refName.Result = "Cancel" {
-        TraySetIcon (FF_ERROR)
-        msg := CustomMsgBox()
-        msg.SetText("CreatePureRefFile", "PureRef file creation canceled.")
-        msg.SetPosition(window_width + 240, window_height + 118)
-        msg.SetColorScheme("Error")
-        msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        ; msg.SetCloseTimer(0.25)
-        msg.Show()
-        ; MsgBox("PureRef file creation canceled.", "Canceled", "T0.25 16")
-        TraySetIcon (FF_CREATION)
-        return
+/* ; Prompt the user to enter a name for the files
+GetFileName() {
+    fileName := InputBox("Please enter a File Name.", "File Name", "y720 w250 h100")
+    return {Result: fileName.Result, Value: fileName.Value}
+} */
+
+class FileManager {
+    static fileName := ""
+
+    static GetFileName() {
+        if this.fileName = "" {  ; Only ask once
+            fileName := InputBox("Please enter a File Name.", "File Name", "y720 w250 h100")
+            if fileName.Result = "Cancel" {
+                TraySetIcon (FF_ERROR)
+                msg := CustomMsgBox()
+                msg.SetText("Operation cancelled", "File Name Input Cancelled.")
+                msg.SetPosition(window_width + 240, window_height + 118)
+                msg.SetColorScheme("Error")
+                msg.SetOptions("ToolWindow", "AlwaysOnTop")
+                ; msg.SetCloseTimer(0.25)
+                msg.Show()
+                TraySetIcon (FF_CREATION)
+                ; MsgBox "Operation cancelled"
+                return false
+            }
+            this.fileName := fileName.Value
+        }
+        return true
     }
 
-    ; Construct the full path of the file to be created
-    filePath := dirPath "\" refName.Value "Scene.pur"
+    static ClearFileName() {  ; Method to reset the filename if needed
+        this.fileName := ""
+    }
+}
 
-    if FileExist("C:\source\original.txt") {
+; Create a new blend file
+CreateNewBlendFile(dirPath) {
+    if !FileManager.GetFileName()
+        return
+    
+    if FileExist(BLEND_FILE) {
         try {
-            FileCopy "C:\\original.txt", "C:\destination\newname.txt"
-            MsgBox "File copied successfully!"
+            FileCopy BLEND_FILE, dirPath "\" FileManager.fileName ".blend"
+            TraySetIcon (FF_ERROR)
+            msg := CustomMsgBox()
+            msg.SetText("FileCopy", "File copied successfully!")
+            msg.SetPosition(window_width + 240, window_height + 118)
+            msg.SetColorScheme("Success")
+            msg.SetOptions("ToolWindow", "AlwaysOnTop")
+            msg.SetCloseTimer(1)
+            msg.Show()
+            ; MsgBox "File copied successfully!"
+            TraySetIcon (FF_CREATION)
         } catch Error as err {
             MsgBox "Error copying file: " err.Message
         }
     } else {
-        MsgBox "Source file doesn't exist!"
-    }
-
-    ; Use FileAppend to create the file
-    try {
-        FileAppend("", filePath)
-        TraySetIcon (FF_INFO)
-        msg := CustomMsgBox()
-        msg.SetText("CreatePureRefFile", "File created: " filePath "Successfully.")
-        msg.SetPosition(window_width + 80, window_height + 118)
-        msg.SetColorScheme("Success")
-        msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(0.5)
-        msg.Show()
-        ; MsgBox("File created: " filePath, "Success", "T1 64")
-        TraySetIcon (FF_CREATION)
-        bFiles.Destroy()
-    }
-    catch as err {
         TraySetIcon (FF_ERROR)
         msg := CustomMsgBox()
-        msg.SetText("CreatePureRefFile", "Error creating PureRef file: " err.Message "Error")
+        msg.SetText("FileExist", "Source file doesn't exist!")
         msg.SetPosition(window_width + 240, window_height + 118)
         msg.SetColorScheme("Error")
         msg.SetOptions("ToolWindow", "AlwaysOnTop")
         msg.SetCloseTimer(1)
         msg.Show()
-        ; MsgBox("Error creating PureRef file: " err.Message, "Error", "48")
+        ; MsgBox "Source file doesn't exist!"
         TraySetIcon (FF_CREATION)
-        ; bFiles.Destroy()
     }
+}
+
+; Create a PostProcessing file
+CreatePostProcessingFile(dirPath) {
+    if FileExist(POST_PROCESSING) {
+        try {
+            FileCopy POST_PROCESSING, dirPath
+            TraySetIcon (FF_ERROR)
+            msg := CustomMsgBox()
+            msg.SetText("FileCopy", "File copied successfully!")
+            msg.SetPosition(window_width + 240, window_height + 118)
+            msg.SetColorScheme("Success")
+            msg.SetOptions("ToolWindow", "AlwaysOnTop")
+            msg.SetCloseTimer(1)
+            msg.Show()
+            ; MsgBox "File copied successfully!"
+            TraySetIcon (FF_CREATION)
+        } catch Error as err {
+            MsgBox "Error copying file: " err.Message
+        }
+    } else {
+        TraySetIcon (FF_ERROR)
+        msg := CustomMsgBox()
+        msg.SetText("FileExist", "Source file doesn't exist!")
+        msg.SetPosition(window_width + 240, window_height + 118)
+        msg.SetColorScheme("Error")
+        msg.SetOptions("ToolWindow", "AlwaysOnTop")
+        msg.SetCloseTimer(1)
+        msg.Show()
+        ; MsgBox "Source file doesn't exist!"
+        TraySetIcon (FF_CREATION)
+    }
+}
+
+; Create a PureRef file
+CreatePureRefFile(dirPath) {
+    if !FileManager.GetFileName()
+        return
+
+    /*
+    Construct the full path of the file to be created
+    ! Deprecated method, do not use
+    ! filePath := dirPath "\" refName.Value "Scene.pur"
+    */
+
+    if FileExist(REFERENCE_FILE) {
+        try {
+            FileCopy REFERENCE_FILE, dirPath "\" FileManager.fileName "Scene.pur"
+            TraySetIcon (FF_ERROR)
+            msg := CustomMsgBox()
+            msg.SetText("FileCopy", "File copied successfully!")
+            msg.SetPosition(window_width + 240, window_height + 118)
+            msg.SetColorScheme("Success")
+            msg.SetOptions("ToolWindow", "AlwaysOnTop")
+            msg.SetCloseTimer(1)
+            msg.Show()
+            ; MsgBox "File copied successfully!"
+            TraySetIcon (FF_CREATION)
+        } catch Error as err {
+            MsgBox "Error copying file: " err.Message
+        }
+    } else {
+        TraySetIcon (FF_ERROR)
+        msg := CustomMsgBox()
+        msg.SetText("FileExist", "Source file doesn't exist!")
+        msg.SetPosition(window_width + 240, window_height + 118)
+        msg.SetColorScheme("Error")
+        msg.SetOptions("ToolWindow", "AlwaysOnTop")
+        msg.SetCloseTimer(1)
+        msg.Show()
+        ; MsgBox "Source file doesn't exist!"
+        TraySetIcon (FF_CREATION)
+    }
+
+    /*
+    ; Use FileAppend to create the file
+    ! Deprecated method, do not use
+    ! try {
+    !     FileAppend("", filePath)
+    !     TraySetIcon (FF_INFO)
+    !     msg := CustomMsgBox()
+    !     msg.SetText("CreatePureRefFile", "File created: " filePath "Successfully.")
+    !     msg.SetPosition(window_width + 80, window_height + 118)
+    !     msg.SetColorScheme("Success")
+    !     msg.SetOptions("ToolWindow", "AlwaysOnTop")
+    !     msg.SetCloseTimer(0.5)
+    !     msg.Show()
+    !     ; MsgBox("File created: " filePath, "Success", "T1 64")
+    !     TraySetIcon (FF_CREATION)
+    !     bFiles.Destroy()
+    ! }
+    ! catch as err {
+    !     TraySetIcon (FF_ERROR)
+    !     msg := CustomMsgBox()
+    !     msg.SetText("CreatePureRefFile", "Error creating PureRef file: " err.Message "Error")
+    !     msg.SetPosition(window_width + 240, window_height + 118)
+    !     msg.SetColorScheme("Error")
+    !     msg.SetOptions("ToolWindow", "AlwaysOnTop")
+    !     msg.SetCloseTimer(1)
+    !     msg.Show()
+    !     ; MsgBox("Error creating PureRef file: " err.Message, "Error", "48")
+    !     TraySetIcon (FF_CREATION)
+    !     ; bFiles.Destroy()
+    ! }
+    */
 }
 
 StrJoin(arr, sep) {
