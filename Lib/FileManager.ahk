@@ -2,7 +2,7 @@
  * @description User input box for file names
  * @file FileManager.ahk
  * @author Aaqil Ilyas
- * @link (https://github.com/Aaqil101/FF-Creation)
+ * @link (https://github.com/Aaqil101/FF-Creation/blob/master/Lib/FileManager.ahk)
  * @created 2024-10-20
  * @version 1.0.0
  **************************************************************************/
