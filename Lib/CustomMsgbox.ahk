@@ -1,13 +1,19 @@
 /************************************************************************
- * @description Highly configurable message box.
- * @license WTFPL
+ * @description A highly configurable message box library for AutoHotkey v2 that provides
+ * extensive customization options for creating modern, stylish dialog boxes. Features
+ * include customizable colors, fonts, buttons, positioning, auto-close timers, and
+ * multiple pre-defined color schemes with support for custom themes.
+ * 
+ * @license GPL-3.0
  * @file CustomMsgbox.ahk
  * @author Aaqil Ilyas
  * @link (https://github.com/Aaqil101/Custom-Libraries/tree/master/Custom%20Msgbox)
- * @created on 2024-10-17
+ * @created 2024-10-17
  * @version 2.1.0
  * @copyright 2024 Aaqil Ilyas
  **************************************************************************/
+
+#Requires Autohotkey v2.0
 
 /*
 * Include the GuiEnhancerKit library, which provides a set of functions to enhance the look and feel of AutoHotkey GUIs.
