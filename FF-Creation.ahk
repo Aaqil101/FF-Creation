@@ -1,11 +1,11 @@
 ﻿/************************************************************************
  * @description Highly configurable message box.
- * @license WTFPL
+ * @license GPL-3.0
  * @file FF-Creation.ahk
  * @author Aaqil Ilyas
- * @link ()
- * @date 2024-10-17
- * @version 2.1.0
+ * @link (https://github.com/Aaqil101/FF-Creation)
+ * @created 2024-10-20
+ * @version 1.5.0
  * @copyright 2024 Aaqil Ilyas
  **************************************************************************/
 
@@ -30,6 +30,12 @@ SetDefaultMouseSpeed 0
 
 * Include the PicSwitch library, which allows you to create custom checkboxes using images and icons.
 * For more information, see https://www.autohotkey.com/boards/viewtopic.php?t=123831#:~:text=Viewed%201370%20times-,PicSwitch.ahk,-Code%3A%20Select
+
+* Include the CursorHandler library, which allows you to handle cursors.
+* For more information, see https://www.youtube.com/watch?v=jn83VAU3tBw
+
+* Include the CustomMsgbox library, which allows you to create custom message boxes.
+* For more information, see https://github.com/Aaqil101/Custom-Libraries/tree/master/Custom%20Msgbox
 */
 
 #Include Lib\GuiEnhancerKit.ahk
@@ -42,8 +48,8 @@ WINDOW_WIDTH  := 250
 WINDOW_HEIGHT := 280
 CS_MSGBOX     := A_ScriptDir "\Icon\CS_Msgbox.png"
 FF_CREATION   := A_ScriptDir "\Icon\FF_Creation.png"
-FF_ERROR01    := A_ScriptDir "\Icon\FF_Error01.png"
-FF_STOP01     := A_ScriptDir "\Icon\FF_Stop01.png"
+FF_ERROR      := A_ScriptDir "\Icon\FF_Error.png"
+FF_STOP       := A_ScriptDir "\Icon\FF_Stop.png"
 FF_INFO       := A_ScriptDir "\Icon\FF_Info.png"
 FF_QUESTION   := A_ScriptDir "\Icon\FF_Question.png"
 
@@ -353,7 +359,7 @@ CreatePureRefFile(dirPath) {
     if refName.Result = "Cancel" {
         TraySetIcon (FF_ERROR01)
         msg := CustomMsgBox()
-        msg.SetText("customPaths.Length", "Please enter at least one path.")
+        msg.SetText("CreatePureRefFile", "PureRef file creation canceled.")
         msg.SetPosition(window_width + 240, window_height + 118)
         msg.SetColorScheme("Error")
         msg.SetOptions("ToolWindow", "AlwaysOnTop")
@@ -370,6 +376,16 @@ CreatePureRefFile(dirPath) {
     ; Use FileAppend to create the file
     try {
         FileAppend("", filePath)
+        TraySetIcon (FF_INFO)
+        msg := CustomMsgBox()
+        msg.SetText("CreatePureRefFile", "PureRef file creation canceled.")
+        msg.SetPosition(window_width + 240, window_height + 118)
+        msg.SetColorScheme("Error")
+        msg.SetOptions("ToolWindow", "AlwaysOnTop")
+        msg.SetCloseTimer(0.25)
+        msg.Show()
+        ; MsgBox("PureRef file creation canceled.", "Canceled", "T0.25 16")
+        TraySetIcon (FF_CREATION)
         MsgBox("File created: " filePath, "Success", "T1 64")
     }
     catch as err {
