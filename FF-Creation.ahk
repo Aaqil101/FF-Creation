@@ -36,6 +36,9 @@ SetDefaultMouseSpeed 0
 
 * Include the CustomMsgbox library, which allows you to create custom message boxes.
 * For more information, see https://github.com/Aaqil101/Custom-Libraries/tree/master/Custom%20Msgbox
+
+* Include the FileManager library, which allows you to create input boxes.
+* For more information, see https://github.com/Aaqil101/FF-Creation/blob/master/Lib/FileManager.ahk
 */
 
 #Include Lib\GuiEnhancerKit.ahk
@@ -43,18 +46,21 @@ SetDefaultMouseSpeed 0
 #Include Lib\PicSwitch.ahk
 #Include Lib\CursorHandler.ahk
 #Include Lib\CustomMsgbox.ahk
+#Include Lib\FileManager.ahk
 
-WINDOW_WIDTH        :=  250
-WINDOW_HEIGHT       :=  280
-CS_MSGBOX           :=  A_ScriptDir "\Lib\Icons\CS_Msgbox.png"
-FF_CREATION         :=  A_ScriptDir "\Lib\Icons\FF_Creation.png"
-FF_ERROR            :=  A_ScriptDir "\Lib\Icons\FF_Error.png"
-FF_STOP             :=  A_ScriptDir "\Lib\Icons\FF_Stop.png"
-FF_INFO             :=  A_ScriptDir "\Lib\Icons\FF_Info.png"
-FF_QUESTION         :=  A_ScriptDir "\Lib\Icons\FF_Question.png"
-POST_PROCESSING     :=  A_ScriptDir "\Lib\Sources\post-processing.blend"
-REFERENCE_FILE      :=  A_ScriptDir "\Lib\Sources\NewScene.pur"
-BLEND_FILE          :=  A_ScriptDir "\Lib\Sources\NewBlenderProjects.blend"
+WINDOW_WIDTH := 250
+WINDOW_HEIGHT := 280
+SuccessTimer := 0.5
+ErrorTimer := 1
+CS_MSGBOX := A_ScriptDir "\Lib\Icons\CS_Msgbox.png"
+FF_CREATION := A_ScriptDir "\Lib\Icons\FF_Creation.png"
+FF_ERROR := A_ScriptDir "\Lib\Icons\FF_Error.png"
+FF_STOP := A_ScriptDir "\Lib\Icons\FF_Stop.png"
+FF_INFO := A_ScriptDir "\Lib\Icons\FF_Info.png"
+FF_QUESTION := A_ScriptDir "\Lib\Icons\FF_Question.png"
+POST_PROCESSING := A_ScriptDir "\Lib\Sources\post-processing.blend"
+REFERENCE_FILE := A_ScriptDir "\Lib\Sources\NewScene.pur"
+BLEND_FILE := A_ScriptDir "\Lib\Sources\NewBlenderProjects.blend"
 
 ; Add Color Scheme
 CustomMsgBox.AddColorScheme("Error", "FF0000", "FFFFFF", "d46666")
@@ -64,15 +70,15 @@ TraySetIcon (FF_CREATION)
 
 ; Define the folder names and their default states
 folders := [
-    {name: "a_blend", default: true},
-    {name: "b_ref", default: true},
-    {name: "c_previs", default: true},
-    {name: "d_postproc", default: false},
-    {name: "d_martiniShot", default: false},
-    {name: "e_videdit", default: false},
-    {name: "e_martiniShot", default: false},
-    {name: "f_finalTouch", default: false},
-    {name: "g_martiniShot", default: false}
+    { name: "a_blend", default: true },
+    { name: "b_ref", default: true },
+    { name: "c_previs", default: true },
+    { name: "d_postproc", default: false },
+    { name: "d_martiniShot", default: false },
+    { name: "e_videdit", default: false },
+    { name: "e_martiniShot", default: false },
+    { name: "f_finalTouch", default: false },
+    { name: "g_martiniShot", default: false }
 ]
 
 ; Create a GUI for folder selection
@@ -165,7 +171,7 @@ MouseMove(
 ! IDC_SIZEWE := 32644         ; IDC_SIZEWE - Double arrow pointing W and E
 ! IDC_UPARROW := 32516        ; IDC_UPARROW - Up arrow
 ! IDC_WAIT := 32514           ; IDC_WAIT - Hourglass
-! 
+!
 ! ; Load the "hand" cursor from the system resources
 ! ; This cursor is used to indicate that a button is clickable
 ! ; The first parameter is NULL, which tells the function to load the cursor
@@ -174,7 +180,7 @@ MouseMove(
 ! BCursor := DllCall(
 !     "LoadCursor", "UInt", NULL := 0, "Int", IDC_HAND, "UInt"
 ! )
-! 
+!
 ! ; Load the "hand" cursor from the system resources
 ! ; This cursor is used to indicate that a link is clickable
 ! ; The first parameter is NULL, which tells the function to load the cursor
@@ -183,14 +189,14 @@ MouseMove(
 ! LVCursor := DllCall(
 !     "LoadCursor", "UInt", NULL := 0, "Int", IDC_HAND, "UInt"
 ! )
-! 
+!
 ! ; Set the cursor when hovering over certain buttons
 ! OnMessage(0x200, WM_MOUSEMOVE)
 ! WM_MOUSEMOVE(wParam, lParam, msg, hwnd) {
 !     global BCursor
 !     global LVCursor
 !     MouseGetPos(, , , &ctrl)
-! 
+!
 !     ; Set the cursor to 'BCursor' when hovering over Buttons
 !     if (ctrl == "Button1")
 !         DllCall("SetCursor", "UInt", BCursor)
@@ -230,7 +236,7 @@ CreateInSelectedFolders(*) {
         msg.SetPosition(window_width + 240, window_height + 118)
         msg.SetColorScheme("Error")
         msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(1)
+        msg.SetCloseTimer(ErrorTimer)
         msg.Show()
         ; MsgBox("Please select at least one folder to create.", "Select Folders", "T1 16")
         TraySetIcon (FF_CREATION)
@@ -256,6 +262,11 @@ CreateInSelectedFolders(*) {
             }
         }
 
+        ; Create blend file if a_blend was selected
+        if (createBlend) {
+            CreateNewBlendFile(selectedPath "\a_blend")
+        }
+        
         ; Create PureRef file if b_ref was selected
         if (createPureRef) {
             CreatePureRefFile(selectedPath "\b_ref")
@@ -266,10 +277,6 @@ CreateInSelectedFolders(*) {
             CreatePostProcessingFile(selectedPath "\d_postproc")
         }
 
-        ; Create blend file if a_blend was selected
-        if (createBlend) {
-            CreateNewBlendFile(selectedPath "\a_blend")
-        }
 
         ; Prepare result message
         resultMsg := "Results:`n`n"
@@ -278,14 +285,14 @@ CreateInSelectedFolders(*) {
         if (errors.Length > 0)
             resultMsg .= "Errors:`n" StrJoin(errors, "`n")
 
-        
+
         TraySetIcon (FF_INFO)
         msg := CustomMsgBox()
         msg.SetText("Created F&F", resultMsg)
         msg.SetPosition("center", "center")
         msg.SetColorScheme("Success")
         msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(2)
+        msg.SetCloseTimer(SuccessTimer)
         msg.Show()
         ; MsgBox(resultMsg, "Created F&F", "T0.5 64")
         TraySetIcon (FF_CREATION)
@@ -341,7 +348,7 @@ CreateInCustomPaths(*) {
         msg.SetPosition(window_width + 240, window_height + 118)
         msg.SetColorScheme("Error")
         msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(1)
+        msg.SetCloseTimer(ErrorTimer)
         msg.Show()
         ; MsgBox("Please select at least one folder to create.", "Select Folders", "T0.5 16")
         bFiles.Destroy()
@@ -359,7 +366,7 @@ CreateInCustomPaths(*) {
         msg.SetPosition(window_width + 240, window_height + 118)
         msg.SetColorScheme("Error")
         msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(1)
+        msg.SetCloseTimer(ErrorTimer)
         msg.Show()
         ; MsgBox("Please enter at least one path.", "Enter Paths", "T0.5 16")
         bFiles.Destroy()
@@ -380,6 +387,11 @@ CreateInCustomPaths(*) {
                     DirCreate(fullPath)
                     createdFolders.Push(fullPath)
 
+                    ; Create blend file if a_blend was selected
+                    if (folder == "a_blend" && createBlend) {
+                        CreateNewBlendFile(fullPath)
+                    }
+
                     ; Create PureRef file if b_ref was selected
                     if (folder == "b_ref" && createPureRef) {
                         CreatePureRefFile(fullPath)
@@ -388,11 +400,6 @@ CreateInCustomPaths(*) {
                     ; Create postproc file if d_postproc was selected
                     if (folder == "d_postproc" && createpostproc) {
                         CreatePostProcessingFile(fullPath)
-                    }
-
-                    ; Create blend file if a_blend was selected
-                    if (folder == "a_blend" && createBlend) {
-                        CreateNewBlendFile(fullPath)
                     }
                 }
                 catch as err {
@@ -409,108 +416,62 @@ CreateInCustomPaths(*) {
     if (errors.Length > 0)
         resultMsg .= "Errors:`n" StrJoin(errors, "`n")
 
-    MsgBox(resultMsg, "Created F&F", "T0.5 64")
+    TraySetIcon (FF_INFO)
+    msg := CustomMsgBox()
+    msg.SetText("Created F&F", resultMsg)
+    msg.SetPosition("center", "center")
+    msg.SetColorScheme("Success")
+    msg.SetOptions("ToolWindow", "AlwaysOnTop")
+    msg.SetCloseTimer(SuccessTimer)
+    msg.Show()
+    ; MsgBox(resultMsg, "Created F&F", "T0.5 64")
+    TraySetIcon (FF_CREATION)
 
     ; Terminate the script
     ExitApp()
-}
-
-/* ; Prompt the user to enter a name for the files
-GetFileName() {
-    fileName := InputBox("Please enter a File Name.", "File Name", "y720 w250 h100")
-    return {Result: fileName.Result, Value: fileName.Value}
-} */
-
-class FileManager {
-    static fileName := ""
-
-    static GetFileName() {
-        if this.fileName = "" {  ; Only ask once
-            fileName := InputBox("Please enter a File Name.", "File Name", "y720 w250 h100")
-            if fileName.Result = "Cancel" {
-                TraySetIcon (FF_ERROR)
-                msg := CustomMsgBox()
-                msg.SetText("Operation cancelled", "File Name Input Cancelled.")
-                msg.SetPosition(window_width + 240, window_height + 118)
-                msg.SetColorScheme("Error")
-                msg.SetOptions("ToolWindow", "AlwaysOnTop")
-                ; msg.SetCloseTimer(0.25)
-                msg.Show()
-                TraySetIcon (FF_CREATION)
-                ; MsgBox "Operation cancelled"
-                return false
-            }
-            this.fileName := fileName.Value
-        }
-        return true
-    }
-
-    static ClearFileName() {  ; Method to reset the filename if needed
-        this.fileName := ""
-    }
 }
 
 ; Create a new blend file
 CreateNewBlendFile(dirPath) {
     if !FileManager.GetFileName()
         return
-    
+
+    NBF_msgPositionX := window_width + 240
+    NBF_msgPositionY := window_height + 118
+
     if FileExist(BLEND_FILE) {
         try {
             FileCopy BLEND_FILE, dirPath "\" FileManager.fileName ".blend"
             TraySetIcon (FF_ERROR)
             msg := CustomMsgBox()
             msg.SetText("FileCopy", "File copied successfully!")
-            msg.SetPosition(window_width + 240, window_height + 118)
+            msg.SetPosition(NBF_msgPositionX, NBF_msgPositionY)
             msg.SetColorScheme("Success")
             msg.SetOptions("ToolWindow", "AlwaysOnTop")
-            msg.SetCloseTimer(1)
+            msg.SetCloseTimer(SuccessTimer)
             msg.Show()
             ; MsgBox "File copied successfully!"
             TraySetIcon (FF_CREATION)
         } catch Error as err {
-            MsgBox "Error copying file: " err.Message
-        }
-    } else {
-        TraySetIcon (FF_ERROR)
-        msg := CustomMsgBox()
-        msg.SetText("FileExist", "Source file doesn't exist!")
-        msg.SetPosition(window_width + 240, window_height + 118)
-        msg.SetColorScheme("Error")
-        msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(1)
-        msg.Show()
-        ; MsgBox "Source file doesn't exist!"
-        TraySetIcon (FF_CREATION)
-    }
-}
-
-; Create a PostProcessing file
-CreatePostProcessingFile(dirPath) {
-    if FileExist(POST_PROCESSING) {
-        try {
-            FileCopy POST_PROCESSING, dirPath
-            TraySetIcon (FF_ERROR)
+            TraySetIcon (FF_STOP)
             msg := CustomMsgBox()
-            msg.SetText("FileCopy", "File copied successfully!")
-            msg.SetPosition(window_width + 240, window_height + 118)
-            msg.SetColorScheme("Success")
+            msg.SetText("FileCopy", "Error copying file: " err.Message)
+            msg.SetPosition(NBF_msgPositionX, NBF_msgPositionY)
+            msg.SetColorScheme("Error")
             msg.SetOptions("ToolWindow", "AlwaysOnTop")
-            msg.SetCloseTimer(1)
+            msg.SetCloseTimer(ErrorTimer)
             msg.Show()
-            ; MsgBox "File copied successfully!"
+            ; MsgBox "Error copying file: " err.Message
             TraySetIcon (FF_CREATION)
-        } catch Error as err {
-            MsgBox "Error copying file: " err.Message
         }
     } else {
         TraySetIcon (FF_ERROR)
         msg := CustomMsgBox()
         msg.SetText("FileExist", "Source file doesn't exist!")
-        msg.SetPosition(window_width + 240, window_height + 118)
+        msg.SetPosition(NBF_msgPositionX, NBF_msgPositionY)
         msg.SetColorScheme("Error")
         msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(1)
+        msg.SetCloseTimer(ErrorTimer)
         msg.Show()
         ; MsgBox "Source file doesn't exist!"
         TraySetIcon (FF_CREATION)
@@ -528,30 +489,42 @@ CreatePureRefFile(dirPath) {
     ! filePath := dirPath "\" refName.Value "Scene.pur"
     */
 
+    PRF_msgPositionX := window_width + 240
+    PRF_msgPositionY := window_height + 118 + 92
+
     if FileExist(REFERENCE_FILE) {
         try {
             FileCopy REFERENCE_FILE, dirPath "\" FileManager.fileName "Scene.pur"
             TraySetIcon (FF_ERROR)
             msg := CustomMsgBox()
             msg.SetText("FileCopy", "File copied successfully!")
-            msg.SetPosition(window_width + 240, window_height + 118)
+            msg.SetPosition(PRF_msgPositionX, PRF_msgPositionY)
             msg.SetColorScheme("Success")
             msg.SetOptions("ToolWindow", "AlwaysOnTop")
-            msg.SetCloseTimer(1)
+            msg.SetCloseTimer(SuccessTimer)
             msg.Show()
             ; MsgBox "File copied successfully!"
             TraySetIcon (FF_CREATION)
         } catch Error as err {
-            MsgBox "Error copying file: " err.Message
+            TraySetIcon (FF_STOP)
+            msg := CustomMsgBox()
+            msg.SetText("FileCopy", "Error copying file: " err.Message)
+            msg.SetPosition(PRF_msgPositionX, PRF_msgPositionY)
+            msg.SetColorScheme("Error")
+            msg.SetOptions("ToolWindow", "AlwaysOnTop")
+            msg.SetCloseTimer(ErrorTimer)
+            msg.Show()
+            ; MsgBox "Error copying file: " err.Message
+            TraySetIcon (FF_CREATION)
         }
     } else {
         TraySetIcon (FF_ERROR)
         msg := CustomMsgBox()
         msg.SetText("FileExist", "Source file doesn't exist!")
-        msg.SetPosition(window_width + 240, window_height + 118)
+        msg.SetPosition(PRF_msgPositionX, PRF_msgPositionY)
         msg.SetColorScheme("Error")
         msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(1)
+        msg.SetCloseTimer(ErrorTimer)
         msg.Show()
         ; MsgBox "Source file doesn't exist!"
         TraySetIcon (FF_CREATION)
@@ -589,6 +562,51 @@ CreatePureRefFile(dirPath) {
     ! }
     */
 }
+
+; Create a PostProcessing file
+CreatePostProcessingFile(dirPath) {
+    PPF_msgPositionX := window_width + 240
+    PPF_msgPositionY := window_height + 118 + 92 + 114
+
+    if FileExist(POST_PROCESSING) {
+        try {
+            FileCopy POST_PROCESSING, dirPath
+            TraySetIcon (FF_ERROR)
+            msg := CustomMsgBox()
+            msg.SetText("FileCopy", "File copied successfully!")
+            msg.SetPosition(PPF_msgPositionX, PPF_msgPositionY)
+            msg.SetColorScheme("Success")
+            msg.SetOptions("ToolWindow", "AlwaysOnTop")
+            msg.SetCloseTimer(SuccessTimer)
+            msg.Show()
+            ; MsgBox "File copied successfully!"
+            TraySetIcon (FF_CREATION)
+        } catch Error as err {
+            TraySetIcon (FF_STOP)
+            msg := CustomMsgBox()
+            msg.SetText("FileCopy", "Error copying file: " err.Message)
+            msg.SetPosition(PPF_msgPositionX, PPF_msgPositionY)
+            msg.SetColorScheme("Error")
+            msg.SetOptions("ToolWindow", "AlwaysOnTop")
+            msg.SetCloseTimer(ErrorTimer)
+            msg.Show()
+            ; MsgBox "Error copying file: " err.Message
+            TraySetIcon (FF_CREATION)
+        }
+    } else {
+        TraySetIcon (FF_ERROR)
+        msg := CustomMsgBox()
+        msg.SetText("FileExist", "Source file doesn't exist!")
+        msg.SetPosition(PPF_msgPositionX, PPF_msgPositionY)
+        msg.SetColorScheme("Error")
+        msg.SetOptions("ToolWindow", "AlwaysOnTop")
+        msg.SetCloseTimer(ErrorTimer)
+        msg.Show()
+        ; MsgBox "Source file doesn't exist!"
+        TraySetIcon (FF_CREATION)
+    }
+}
+
 
 StrJoin(arr, sep) {
     result := ""
