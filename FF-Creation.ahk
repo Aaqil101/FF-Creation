@@ -1,4 +1,16 @@
-﻿#Requires Autohotkey v2.0
+﻿/************************************************************************
+ * @description Highly configurable message box.
+ * @license WTFPL
+ * @file FF-Creation.ahk
+ * @author Aaqil Ilyas
+ * @link ()
+ * @date 2024-10-17
+ * @version 2.1.0
+ * @copyright 2024 Aaqil Ilyas
+ **************************************************************************/
+
+
+#Requires Autohotkey v2.0
 
 SetWorkingDir(A_ScriptDir)  ; Ensures a consistent starting directory.
 #SingleInstance Force ;Only launch anstance of thi5 scrxpt.
@@ -34,6 +46,9 @@ FF_ERROR01    := A_ScriptDir "\Icon\FF_Error01.png"
 FF_STOP01     := A_ScriptDir "\Icon\FF_Stop01.png"
 FF_INFO       := A_ScriptDir "\Icon\FF_Info.png"
 FF_QUESTION   := A_ScriptDir "\Icon\FF_Question.png"
+
+; Add Color Scheme
+CustomMsgBox.AddColorScheme("Error", "FF0000", "FFFFFF", "d46666")
 
 TraySetIcon (FF_CREATION)
 
@@ -263,14 +278,13 @@ CreateInCustomPaths(*) {
 
     if (selectedFolders.Length == 0) {
         TraySetIcon (FF_ERROR01)
-        /* CustomMsgBox.AddColorScheme("Error", "FF0000", "FFFFFF", "d46666")
         msg := CustomMsgBox()
         msg.SetText("selectedFolders.Length", "Please select at least one folder to create.")
         msg.SetPosition(window_width + 240, window_height + 118)
         msg.SetColorScheme("Error")
         msg.SetOptions("ToolWindow", "AlwaysOnTop")
         msg.SetCloseTimer(1)
-        msg.Show() */
+        msg.Show()
         ; MsgBox("Please select at least one folder to create.", "Select Folders", "T0.5 16")
         bFiles.Destroy()
         TraySetIcon (FF_CREATION)
@@ -282,14 +296,13 @@ CreateInCustomPaths(*) {
 
     if (customPaths.Length == 0) {
         TraySetIcon (FF_STOP01)
-        /* CustomMsgBox.AddColorScheme("Error", "FF0000", "FFFFFF", "d46666")
         msg := CustomMsgBox()
         msg.SetText("customPaths.Length", "Please enter at least one path.")
         msg.SetPosition(window_width + 240, window_height + 118)
         msg.SetColorScheme("Error")
         msg.SetOptions("ToolWindow", "AlwaysOnTop")
         msg.SetCloseTimer(1)
-        msg.Show() */
+        msg.Show()
         ; MsgBox("Please enter at least one path.", "Enter Paths", "T0.5 16")
         bFiles.Destroy()
         TraySetIcon (FF_CREATION)
@@ -338,7 +351,16 @@ CreatePureRefFile(dirPath) {
     ; Prompt the user to enter a name for the PureRef reference file
     refName := InputBox("Please enter a PureRef Name.", "Reference File Name", "y720 w250 h100")
     if refName.Result = "Cancel" {
-        MsgBox("PureRef file creation canceled.", "Canceled", "T0.25 16")
+        TraySetIcon (FF_ERROR01)
+        msg := CustomMsgBox()
+        msg.SetText("customPaths.Length", "Please enter at least one path.")
+        msg.SetPosition(window_width + 240, window_height + 118)
+        msg.SetColorScheme("Error")
+        msg.SetOptions("ToolWindow", "AlwaysOnTop")
+        msg.SetCloseTimer(0.25)
+        msg.Show()
+        ; MsgBox("PureRef file creation canceled.", "Canceled", "T0.25 16")
+        TraySetIcon (FF_CREATION)
         return
     }
 
