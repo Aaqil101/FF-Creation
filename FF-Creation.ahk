@@ -55,6 +55,7 @@ FF_QUESTION   := A_ScriptDir "\Icon\FF_Question.png"
 
 ; Add Color Scheme
 CustomMsgBox.AddColorScheme("Error", "FF0000", "FFFFFF", "d46666")
+CustomMsgBox.AddColorScheme("Success", "d4edda", "155724", "28a745")
 
 TraySetIcon (FF_CREATION)
 
@@ -250,7 +251,19 @@ CreateInSelectedFolders(*) {
         if (errors.Length > 0)
             resultMsg .= "Errors:`n" StrJoin(errors, "`n")
 
-        MsgBox(resultMsg, "Created F&F", "T0.5 64")
+        
+        TraySetIcon (FF_INFO)
+        msg := CustomMsgBox()
+        msg.SetText("Created F&F", resultMsg)
+        msg.SetPosition(window_width, window_height)
+        msg.SetColorScheme("Success")
+        msg.SetOptions("ToolWindow", "AlwaysOnTop")
+        msg.SetAppearance(8)
+        ; msg.SetCloseTimer(0.25)
+        msg.Show()
+        ; MsgBox(resultMsg, "Created F&F", "T0.5 64")
+        TraySetIcon (FF_CREATION)
+        bFiles.Destroy()
 
         ; Terminate the script
         ExitApp()
@@ -283,7 +296,7 @@ CreateInCustomPaths(*) {
     }
 
     if (selectedFolders.Length == 0) {
-        TraySetIcon (FF_ERROR01)
+        TraySetIcon (FF_ERROR)
         msg := CustomMsgBox()
         msg.SetText("selectedFolders.Length", "Please select at least one folder to create.")
         msg.SetPosition(window_width + 240, window_height + 118)
@@ -301,7 +314,7 @@ CreateInCustomPaths(*) {
     customPaths := StrSplit(customPaths, ",")
 
     if (customPaths.Length == 0) {
-        TraySetIcon (FF_STOP01)
+        TraySetIcon (FF_STOP)
         msg := CustomMsgBox()
         msg.SetText("customPaths.Length", "Please enter at least one path.")
         msg.SetPosition(window_width + 240, window_height + 118)
@@ -357,13 +370,13 @@ CreatePureRefFile(dirPath) {
     ; Prompt the user to enter a name for the PureRef reference file
     refName := InputBox("Please enter a PureRef Name.", "Reference File Name", "y720 w250 h100")
     if refName.Result = "Cancel" {
-        TraySetIcon (FF_ERROR01)
+        TraySetIcon (FF_ERROR)
         msg := CustomMsgBox()
         msg.SetText("CreatePureRefFile", "PureRef file creation canceled.")
         msg.SetPosition(window_width + 240, window_height + 118)
         msg.SetColorScheme("Error")
         msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(0.25)
+        ; msg.SetCloseTimer(0.25)
         msg.Show()
         ; MsgBox("PureRef file creation canceled.", "Canceled", "T0.25 16")
         TraySetIcon (FF_CREATION)
@@ -378,18 +391,28 @@ CreatePureRefFile(dirPath) {
         FileAppend("", filePath)
         TraySetIcon (FF_INFO)
         msg := CustomMsgBox()
-        msg.SetText("CreatePureRefFile", "PureRef file creation canceled.")
+        msg.SetText("CreatePureRefFile", "File created: " filePath "Successfully.")
+        msg.SetPosition(window_width + 240, window_height + 118)
+        msg.SetColorScheme("Success")
+        msg.SetOptions("ToolWindow", "AlwaysOnTop")
+        msg.SetCloseTimer(1)
+        msg.Show()
+        ; MsgBox("File created: " filePath, "Success", "T1 64")
+        TraySetIcon (FF_CREATION)
+        bFiles.Destroy()
+    }
+    catch as err {
+        TraySetIcon (FF_ERROR)
+        msg := CustomMsgBox()
+        msg.SetText("CreatePureRefFile", "Error creating PureRef file: " err.Message "Error")
         msg.SetPosition(window_width + 240, window_height + 118)
         msg.SetColorScheme("Error")
         msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(0.25)
+        msg.SetCloseTimer(1)
         msg.Show()
-        ; MsgBox("PureRef file creation canceled.", "Canceled", "T0.25 16")
+        ; MsgBox("Error creating PureRef file: " err.Message, "Error", "48")
         TraySetIcon (FF_CREATION)
-        MsgBox("File created: " filePath, "Success", "T1 64")
-    }
-    catch as err {
-        MsgBox("Error creating PureRef file: " err.Message, "Error", "T1 48 y720")
+        ; bFiles.Destroy()
     }
 }
 
