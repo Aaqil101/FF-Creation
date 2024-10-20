@@ -86,16 +86,16 @@ bFiles.BackColor := "313131"
 ; Add checkboxes for each folder
 for index, folder in folders {
     /* m := Map()
-    m["Value0DisabledIcon"]:=m["Value1DisabledIcon"]:="Icon\SW_Value0DisabledIcon.png"
-    m["Value1Icon"] := "Icon\SW_Value1Icon.png"
-    m["Value0Icon"] := "Icon\SW_Value0Icon.png" */
+    m["Value0DisabledIcon"]:=m["Value1DisabledIcon"]:="Lib\Icons\SW_Value0DisabledIcon.png"
+    m["Value1Icon"] := "Lib\Icons\SW_Value1Icon.png"
+    m["Value0Icon"] := "Lib\Icons\SW_Value0Icon.png" */
 
     m := Map()
     m["SWidth"] := 20
     m["SHeight"] := 20
-    m["Value0DisabledIcon"] := m["Value1DisabledIcon"] := "Icon\CB_Value0DisabledIcon.png"
-    m["Value1Icon"] := "Icon\CB_Value1Icon.png"
-    m["Value0Icon"] := "Icon\CB_Value0Icon.png"
+    m["Value0DisabledIcon"] := m["Value1DisabledIcon"] := "Lib\Icons\CB_Value0DisabledIcon.png"
+    m["Value1Icon"] := "Lib\Icons\CB_Value1Icon.png"
+    m["Value0Icon"] := "Lib\Icons\CB_Value0Icon.png"
 
     /*
     ! Depracated method, do not use
@@ -204,15 +204,30 @@ MouseMove(
 CreateInSelectedFolders(*) {
     selectedFolders := []
     createPureRef := false
+    createpostproc := false
 
     ; Collect selected folders
     for index, folder in folders {
-        if (bFiles["Folder" index].Value)
-        {
+        if (bFiles["Folder" index].Value) {
             selectedFolders.Push(folder.name)
             if (folder.name == "b_ref")
                 createPureRef := true
+            if (folder.name == "d_postproc")
+                createpostproc := true
         }
+        /* if (bFiles["Folder" index].Value) {
+            if (bFiles["Folder" index].Value)
+            {
+                selectedFolders.Push(folder.name)
+                if (folder.name == "b_ref")
+                    createPureRef := true
+            }
+            if (bFiles["Folder" index].Value)
+            {
+                selectedFolders.Push(folder.name)
+                if (folder.name == "d_postproc")
+                    createpostproc := true
+            } */
     }
 
     if (selectedFolders.Length == 0) {
@@ -301,14 +316,16 @@ CreateInCustomPaths(*) {
 
     selectedFolders := []
     createPureRef := false
+    createpostproc := false
 
     ; Collect selected folders
     for index, folder in folders {
-        if (bFiles["Folder" index].Value)
-        {
+        if (bFiles["Folder" index].Value) {
             selectedFolders.Push(folder.name)
             if (folder.name == "b_ref")
                 createPureRef := true
+            if (folder.name == "d_postproc")
+                createpostproc := true
         }
     }
 
@@ -402,6 +419,17 @@ CreatePureRefFile(dirPath) {
 
     ; Construct the full path of the file to be created
     filePath := dirPath "\" refName.Value "Scene.pur"
+
+    if FileExist("C:\source\original.txt") {
+        try {
+            FileCopy "C:\\original.txt", "C:\destination\newname.txt"
+            MsgBox "File copied successfully!"
+        } catch Error as err {
+            MsgBox "Error copying file: " err.Message
+        }
+    } else {
+        MsgBox "Source file doesn't exist!"
+    }
 
     ; Use FileAppend to create the file
     try {
