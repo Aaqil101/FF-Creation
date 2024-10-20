@@ -23,8 +23,8 @@ SetDefaultMouseSpeed 0
 #Include Lib\GuiEnhancerKit.ahk
 #Include Lib\ColorButton.ahk
 #Include Lib\PicSwitch.ahk
-#Include Lib\CustomMsgbox.ahk
 #Include Lib\CursorHandler.ahk
+#Include Lib\CustomMsgbox.ahk
 
 WINDOW_WIDTH  := 250
 WINDOW_HEIGHT := 280
@@ -263,17 +263,17 @@ CreateInCustomPaths(*) {
 
     if (selectedFolders.Length == 0) {
         TraySetIcon (FF_ERROR01)
-        CustomMsgBox.AddColorScheme("Error", "FF0000", "FFFFFF", "d46666")
+        /* CustomMsgBox.AddColorScheme("Error", "FF0000", "FFFFFF", "d46666")
         msg := CustomMsgBox()
         msg.SetText("selectedFolders.Length", "Please select at least one folder to create.")
         msg.SetPosition(window_width + 240, window_height + 118)
         msg.SetColorScheme("Error")
         msg.SetOptions("ToolWindow", "AlwaysOnTop")
         msg.SetCloseTimer(1)
-        msg.Show()
+        msg.Show() */
+        ; MsgBox("Please select at least one folder to create.", "Select Folders", "T0.5 16")
         bFiles.Destroy()
         TraySetIcon (FF_CREATION)
-        ; MsgBox("Please select at least one folder to create.", "Select Folders", "T0.5 16")
         return
     }
 
@@ -282,16 +282,16 @@ CreateInCustomPaths(*) {
 
     if (customPaths.Length == 0) {
         TraySetIcon (FF_STOP01)
-        CustomMsgBox.AddColorScheme("Error", "FF0000", "FFFFFF", "d46666")
+        /* CustomMsgBox.AddColorScheme("Error", "FF0000", "FFFFFF", "d46666")
         msg := CustomMsgBox()
         msg.SetText("customPaths.Length", "Please enter at least one path.")
         msg.SetPosition(window_width + 240, window_height + 118)
         msg.SetColorScheme("Error")
         msg.SetOptions("ToolWindow", "AlwaysOnTop")
         msg.SetCloseTimer(1)
-        msg.Show()
-        bFiles.Destroy()
+        msg.Show() */
         ; MsgBox("Please enter at least one path.", "Enter Paths", "T0.5 16")
+        bFiles.Destroy()
         TraySetIcon (FF_CREATION)
         return
     }
