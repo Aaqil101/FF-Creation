@@ -18,10 +18,10 @@
 #Include CursorHandler.ahk
 #Include CustomMsgbox.ahk
 
-WINDOW_WIDTH        :=  250
-WINDOW_HEIGHT       :=  280
-FF_CREATION         :=  A_ScriptDir "\Lib\Icons\FF_Creation.png"
-FF_ERROR            :=  A_ScriptDir "\Lib\Icons\FF_Error.png"
+WINDOW_WIDTH := 250
+WINDOW_HEIGHT := 280
+FF_CREATION := A_ScriptDir "\Lib\Icons\FF_Creation.png"
+FF_ERROR := A_ScriptDir "\Lib\Icons\FF_Error.png"
 
 ; Add Color Scheme
 CustomMsgBox.AddColorScheme("Error", "FF0000", "FFFFFF", "d46666")
