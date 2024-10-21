@@ -55,10 +55,8 @@ WINDOW_WIDTH := 250
 WINDOW_HEIGHT := 280
 SuccessTimer := 0.5
 ErrorTimer := 1
-CS_MSGBOX := A_ScriptDir "\Lib\Icons\CS_Msgbox.png"
 FF_CREATION := A_ScriptDir "\Lib\Icons\FF_Creation.png"
 FF_ERROR := A_ScriptDir "\Lib\Icons\FF_Error.png"
-FF_STOP := A_ScriptDir "\Lib\Icons\FF_Stop.png"
 FF_INFO := A_ScriptDir "\Lib\Icons\FF_Info.png"
 FF_QUESTION := A_ScriptDir "\Lib\Icons\FF_Question.png"
 POST_PROCESSING := A_ScriptDir "\Lib\Sources\post-processing.blend"
@@ -233,16 +231,7 @@ CreateInSelectedFolders(*) {
     }
 
     if (selectedFolders.Length == 0) {
-        TraySetIcon (FF_ERROR)
-        msg := CustomMsgBox()
-        msg.SetText("selectedFolders.Length", "Please select at least one folder to create.")
-        msg.SetPosition(window_width + 240, window_height + 118)
-        msg.SetColorScheme("Error")
-        msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(ErrorTimer)
-        msg.Show()
-        ; MsgBox("Please select at least one folder to create.", "Select Folders", "T1 16")
-        TraySetIcon (FF_CREATION)
+        ShowError("selectedFolders.Length", "Please select at least one folder to create.", window_width + 240, window_height + 118)
         return
     }
 
@@ -288,36 +277,18 @@ CreateInSelectedFolders(*) {
         if (errors.Length > 0)
             resultMsg .= "Errors:`n" StrJoin(errors, "`n")
 
-
-        TraySetIcon (FF_INFO)
-        msg := CustomMsgBox()
-        msg.SetText("Created F&F", resultMsg)
-        msg.SetPosition("center", "center")
-        msg.SetColorScheme("Success")
-        msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(SuccessTimer)
-        msg.Show()
-        ; MsgBox(resultMsg, "Created F&F", "T0.5 64")
-        TraySetIcon (FF_CREATION)
+        ShowResult("Created F&F", resultMsg, "Center", "Center")
         bFiles.Destroy()
 
         ; Terminate the script
         ExitApp()
     }
     /*
-    else {
-        TraySetIcon (FF_ERROR)
-        msg := CustomMsgBox()
-        msg.SetText("selectedPath", "Folder creation cancelled.")
-        msg.SetPosition(window_width + 240, window_height + 118)
-        msg.SetColorScheme("Error")
-        msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(1)
-        msg.Show()
-        ; MsgBox("Folder creation cancelled.", "Operation Cancelled", "T0.5 16")
-        TraySetIcon (FF_CREATION)
-        ExitApp()
-    }
+    ! I don't think this is needed.
+    ! else {
+    !     ShowError("selectedPath", "Folder creation cancelled.", window_width + 240, window_height + 118)
+    !     ExitApp()
+    ! }
     */
 }
 
@@ -345,17 +316,7 @@ CreateInCustomPaths(*) {
     }
 
     if (selectedFolders.Length == 0) {
-        TraySetIcon (FF_ERROR)
-        msg := CustomMsgBox()
-        msg.SetText("selectedFolders.Length", "Please select at least one folder to create.")
-        msg.SetPosition(window_width + 240, window_height + 118)
-        msg.SetColorScheme("Error")
-        msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(ErrorTimer)
-        msg.Show()
-        ; MsgBox("Please select at least one folder to create.", "Select Folders", "T0.5 16")
-        bFiles.Destroy()
-        TraySetIcon (FF_CREATION)
+        ShowError("selectedFolders.Length", "Please select at least one folder to create.", window_width + 240, window_height + 118)
         return
     }
 
@@ -363,17 +324,7 @@ CreateInCustomPaths(*) {
     customPaths := StrSplit(customPaths, ",")
 
     if (customPaths.Length == 0) {
-        TraySetIcon (FF_STOP)
-        msg := CustomMsgBox()
-        msg.SetText("customPaths.Length", "Please enter at least one path.")
-        msg.SetPosition(window_width + 240, window_height + 118)
-        msg.SetColorScheme("Error")
-        msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(ErrorTimer)
-        msg.Show()
-        ; MsgBox("Please enter at least one path.", "Enter Paths", "T0.5 16")
-        bFiles.Destroy()
-        TraySetIcon (FF_CREATION)
+        ShowError("customPaths.Length", "Please enter at least one path.", window_width + 240, window_height + 118)
         return
     }
 
@@ -419,16 +370,8 @@ CreateInCustomPaths(*) {
     if (errors.Length > 0)
         resultMsg .= "Errors:`n" StrJoin(errors, "`n")
 
-    TraySetIcon (FF_INFO)
-    msg := CustomMsgBox()
-    msg.SetText("Created F&F", resultMsg)
-    msg.SetPosition("center", "center")
-    msg.SetColorScheme("Success")
-    msg.SetOptions("ToolWindow", "AlwaysOnTop")
-    msg.SetCloseTimer(SuccessTimer)
-    msg.Show()
-    ; MsgBox(resultMsg, "Created F&F", "T0.5 64")
-    TraySetIcon (FF_CREATION)
+    ; Show result
+    ShowResult("Created F&F", resultMsg, "Center", "Center")
 
     ; Terminate the script
     ExitApp()
