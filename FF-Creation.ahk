@@ -436,11 +436,15 @@ CreateInCustomPaths(*) {
 
 ; Create a new blend file
 CreateNewBlendFile(dirPath) {
+    NBF_msgPositionY := window_height + 118
+    NBF_msgPositionX := window_width + 240
+
+    ; Create two subfolders
+    DirCreate(dirPath "\assests")
+    DirCreate(dirPath "\textures")
+
     if !FileManager.GetFileName()
         return
-
-    NBF_msgPositionX := window_width + 240
-    NBF_msgPositionY := window_height + 118
 
     if FileExist(BLEND_FILE) {
         try {
@@ -456,6 +460,9 @@ CreateNewBlendFile(dirPath) {
 
 ; Create a PureRef file
 CreatePureRefFile(dirPath) {
+    PRF_msgPositionX := window_width + 240
+    PRF_msgPositionY := window_height + 118 + 92
+
     if !FileManager.GetFileName()
         return
 
@@ -464,9 +471,6 @@ CreatePureRefFile(dirPath) {
     ! Deprecated method, do not use
     ! filePath := dirPath "\" refName.Value "Scene.pur"
     */
-
-    PRF_msgPositionX := window_width + 240
-    PRF_msgPositionY := window_height + 118 + 92
 
     if FileExist(REFERENCE_FILE) {
         try {
@@ -516,6 +520,9 @@ CreatePureRefFile(dirPath) {
 CreatePostProcessingFile(dirPath) {
     PPF_msgPositionX := window_width + 240
     PPF_msgPositionY := window_height + 118 + 92 + 114
+
+    ; Create a subfolder
+    DirCreate(dirPath "\assests")
 
     if FileExist(POST_PROCESSING) {
         try {
