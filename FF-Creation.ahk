@@ -9,11 +9,14 @@
  * @copyright 2024 Aaqil Ilyas
  **************************************************************************/
 
+/*
+* I created most of the script using (https://claude.ai) and I modified it.
+*/
 
 #Requires Autohotkey v2.0
 
 SetWorkingDir(A_ScriptDir)  ; Ensures a consistent starting directory.
-#SingleInstance Force ;Only launch anstance of thi5 scrxpt.
+#SingleInstance Force ;Only launch anstance of this script.
 Persistent ;Will keep it running
 
 ; Set the default mouse speed to 0
@@ -442,39 +445,12 @@ CreateNewBlendFile(dirPath) {
     if FileExist(BLEND_FILE) {
         try {
             FileCopy BLEND_FILE, dirPath "\" FileManager.fileName ".blend"
-            TraySetIcon (FF_ERROR)
-            msg := CustomMsgBox()
-            msg.SetText("FileCopy", "File copied successfully!")
-            msg.SetPosition(NBF_msgPositionX, NBF_msgPositionY)
-            msg.SetColorScheme("Success")
-            msg.SetOptions("ToolWindow", "AlwaysOnTop")
-            msg.SetCloseTimer(SuccessTimer)
-            msg.Show()
-            ; MsgBox "File copied successfully!"
-            TraySetIcon (FF_CREATION)
+            ShowResult("CreateNewBlendFile", "File created successfully!", NBF_msgPositionX, NBF_msgPositionY)
         } catch Error as err {
-            TraySetIcon (FF_STOP)
-            msg := CustomMsgBox()
-            msg.SetText("FileCopy", "Error copying file: " err.Message)
-            msg.SetPosition(NBF_msgPositionX, NBF_msgPositionY)
-            msg.SetColorScheme("Error")
-            msg.SetOptions("ToolWindow", "AlwaysOnTop")
-            msg.SetCloseTimer(ErrorTimer)
-            msg.Show()
-            ; MsgBox "Error copying file: " err.Message
-            TraySetIcon (FF_CREATION)
+            ShowResult("CreateNewBlendFile", "Error copying file: " err.Message, NBF_msgPositionX, NBF_msgPositionY)
         }
     } else {
-        TraySetIcon (FF_ERROR)
-        msg := CustomMsgBox()
-        msg.SetText("FileExist", "Source file doesn't exist!")
-        msg.SetPosition(NBF_msgPositionX, NBF_msgPositionY)
-        msg.SetColorScheme("Error")
-        msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(ErrorTimer)
-        msg.Show()
-        ; MsgBox "Source file doesn't exist!"
-        TraySetIcon (FF_CREATION)
+        ShowError("CreateNewBlendFile", "Source file doesn't exist!", NBF_msgPositionX, NBF_msgPositionY)
     }
 }
 
@@ -495,39 +471,12 @@ CreatePureRefFile(dirPath) {
     if FileExist(REFERENCE_FILE) {
         try {
             FileCopy REFERENCE_FILE, dirPath "\" FileManager.fileName "Scene.pur"
-            TraySetIcon (FF_ERROR)
-            msg := CustomMsgBox()
-            msg.SetText("FileCopy", "File copied successfully!")
-            msg.SetPosition(PRF_msgPositionX, PRF_msgPositionY)
-            msg.SetColorScheme("Success")
-            msg.SetOptions("ToolWindow", "AlwaysOnTop")
-            msg.SetCloseTimer(SuccessTimer)
-            msg.Show()
-            ; MsgBox "File copied successfully!"
-            TraySetIcon (FF_CREATION)
+            ShowResult("CreatePureRefFile", "File created successfully!", PRF_msgPositionX, PRF_msgPositionY)
         } catch Error as err {
-            TraySetIcon (FF_STOP)
-            msg := CustomMsgBox()
-            msg.SetText("FileCopy", "Error copying file: " err.Message)
-            msg.SetPosition(PRF_msgPositionX, PRF_msgPositionY)
-            msg.SetColorScheme("Error")
-            msg.SetOptions("ToolWindow", "AlwaysOnTop")
-            msg.SetCloseTimer(ErrorTimer)
-            msg.Show()
-            ; MsgBox "Error copying file: " err.Message
-            TraySetIcon (FF_CREATION)
+            ShowError("CreatePureRefFile", "Error copying file: " err.Message, PRF_msgPositionX, PRF_msgPositionY)
         }
     } else {
-        TraySetIcon (FF_ERROR)
-        msg := CustomMsgBox()
-        msg.SetText("FileExist", "Source file doesn't exist!")
-        msg.SetPosition(PRF_msgPositionX, PRF_msgPositionY)
-        msg.SetColorScheme("Error")
-        msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(ErrorTimer)
-        msg.Show()
-        ; MsgBox "Source file doesn't exist!"
-        TraySetIcon (FF_CREATION)
+        ShowError("CreatePureRefFile", "Source file doesn't exist!", PRF_msgPositionX, PRF_msgPositionY)
     }
 
     /*
@@ -571,42 +520,38 @@ CreatePostProcessingFile(dirPath) {
     if FileExist(POST_PROCESSING) {
         try {
             FileCopy POST_PROCESSING, dirPath
-            TraySetIcon (FF_ERROR)
-            msg := CustomMsgBox()
-            msg.SetText("FileCopy", "File copied successfully!")
-            msg.SetPosition(PPF_msgPositionX, PPF_msgPositionY)
-            msg.SetColorScheme("Success")
-            msg.SetOptions("ToolWindow", "AlwaysOnTop")
-            msg.SetCloseTimer(SuccessTimer)
-            msg.Show()
-            ; MsgBox "File copied successfully!"
-            TraySetIcon (FF_CREATION)
+            ShowResult("CreatePostProcessingFile", "File created successfully!", PPF_msgPositionX, PPF_msgPositionY)
         } catch Error as err {
-            TraySetIcon (FF_STOP)
-            msg := CustomMsgBox()
-            msg.SetText("FileCopy", "Error copying file: " err.Message)
-            msg.SetPosition(PPF_msgPositionX, PPF_msgPositionY)
-            msg.SetColorScheme("Error")
-            msg.SetOptions("ToolWindow", "AlwaysOnTop")
-            msg.SetCloseTimer(ErrorTimer)
-            msg.Show()
-            ; MsgBox "Error copying file: " err.Message
-            TraySetIcon (FF_CREATION)
+            ShowError("CreatePostProcessingFile", "Error copying file: " err.Message, PPF_msgPositionX, PPF_msgPositionY)
         }
     } else {
-        TraySetIcon (FF_ERROR)
-        msg := CustomMsgBox()
-        msg.SetText("FileExist", "Source file doesn't exist!")
-        msg.SetPosition(PPF_msgPositionX, PPF_msgPositionY)
-        msg.SetColorScheme("Error")
-        msg.SetOptions("ToolWindow", "AlwaysOnTop")
-        msg.SetCloseTimer(ErrorTimer)
-        msg.Show()
-        ; MsgBox "Source file doesn't exist!"
-        TraySetIcon (FF_CREATION)
+        ShowError("CreatePostProcessingFile", "Source file doesn't exist!", PPF_msgPositionX, PPF_msgPositionY)
     }
 }
 
+ShowError(title, message, msgX, msgY) {
+    TraySetIcon (FF_ERROR)
+    msg := CustomMsgBox()
+    msg.SetText(title, message)
+    msg.SetPosition(msgX, msgY)
+    msg.SetColorScheme("Error")
+    msg.SetOptions("ToolWindow", "AlwaysOnTop")
+    msg.SetCloseTimer(ErrorTimer)
+    msg.Show()
+    TraySetIcon (FF_CREATION)
+}
+
+ShowResult(title, message, msgX, msgY) {
+    TraySetIcon (FF_INFO)
+    msg := CustomMsgBox()
+    msg.SetText(title, message)
+    msg.SetPosition(msgX, msgY)
+    msg.SetColorScheme("Success")
+    msg.SetOptions("ToolWindow", "AlwaysOnTop")
+    msg.SetCloseTimer(SuccessTimer)
+    msg.Show()
+    TraySetIcon (FF_CREATION)
+}
 
 StrJoin(arr, sep) {
     result := ""
