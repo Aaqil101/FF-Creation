@@ -5,7 +5,7 @@
  * @author Aaqil Ilyas
  * @link (https://github.com/Aaqil101/FF-Creation)
  * @created 2024-10-20
- * @version 1.5.0
+ * @version 2.5.0
  * @copyright 2024 Aaqil Ilyas
  **************************************************************************/
 
@@ -53,8 +53,8 @@ SetDefaultMouseSpeed 0
 
 WINDOW_WIDTH := 250
 WINDOW_HEIGHT := 280
-SuccessTimer := 0.5
-ErrorTimer := 1
+SuccessTimer := 60
+ErrorTimer := 60
 FF_CREATION := A_ScriptDir "\Lib\Icons\FF_Creation.png"
 FF_ERROR := A_ScriptDir "\Lib\Icons\FF_Error.png"
 FF_INFO := A_ScriptDir "\Lib\Icons\FF_Info.png"
@@ -210,30 +210,35 @@ MouseMove(
 👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼
 */
 
-; Create in selected folders
+; Create in selected folders (single directory approach)
 CreateInSelectedFolders(*) {
     selectedFolders := []
+    createBlend := false
     createPureRef := false
     createpostproc := false
-    createBlend := false
 
     ; Collect selected folders
     for index, folder in folders {
         if (bFiles["Folder" index].Value) {
             selectedFolders.Push(folder.name)
+            if (folder.name == "a_blend")
+                createBlend := true
             if (folder.name == "b_ref")
                 createPureRef := true
             if (folder.name == "d_postproc")
                 createpostproc := true
-            if (folder.name == "a_blend")
-                createBlend := true
         }
     }
 
+    ; Validate folder selection
     if (selectedFolders.Length == 0) {
         ShowError("selectedFolders.Length", "Please select at least one folder to create.", window_width + 240, window_height + 118)
         return
     }
+
+    ; Get filename for all files
+    if !FileManager.GetFileName()
+        return
 
     ; Ask the user where to create the folders
     selectedPath := FileSelect("D", A_Desktop, "Select where to create the folders")
@@ -242,35 +247,30 @@ CreateInSelectedFolders(*) {
         createdFolders := []
         errors := []
 
+        ; Create folders and handle files
         for folder in selectedFolders {
             fullPath := selectedPath "\" folder
 
             try {
                 DirCreate(fullPath)
                 createdFolders.Push(fullPath)
+
+                ; Create specific files based on folder type
+                if (folder == "a_blend" && createBlend)
+                    CreateNewBlendFile(fullPath, selectedPath)
+                
+                if (folder == "b_ref" && createPureRef)
+                    CreatePureRefFile(fullPath, selectedPath)
+                
+                if (folder == "d_postproc" && createpostproc)
+                    CreatePostProcessingFile(fullPath, selectedPath)
             }
             catch as err {
                 errors.Push("Error creating " folder ": " err.Message)
             }
         }
 
-        ; Create blend file if a_blend was selected
-        if (createBlend) {
-            CreateNewBlendFile(selectedPath "\a_blend")
-        }
-        
-        ; Create PureRef file if b_ref was selected
-        if (createPureRef) {
-            CreatePureRefFile(selectedPath "\b_ref")
-        }
-
-        ; Create postproc file if d_postproc was selected
-        if (createpostproc) {
-            CreatePostProcessingFile(selectedPath "\d_postproc")
-        }
-
-
-        ; Prepare result message
+        ; Prepare and show result message
         resultMsg := "Results:`n`n"
         if (createdFolders.Length > 0)
             resultMsg .= "Created folders:`n" StrJoin(createdFolders, "`n") "`n`n"
@@ -279,106 +279,106 @@ CreateInSelectedFolders(*) {
 
         ShowResult("Created F&F", resultMsg, "Center", "Center")
         bFiles.Destroy()
-
-        ; Terminate the script
         ExitApp()
     }
-    /*
-    ! I don't think this is needed.
-    ! else {
-    !     ShowError("selectedPath", "Folder creation cancelled.", window_width + 240, window_height + 118)
-    !     ExitApp()
-    ! }
-    */
 }
 
-; Create in custom paths
+; Create in custom paths (multiple directory approach)
 CreateInCustomPaths(*) {
-
-    customPaths := InputBox("Enter directory paths:", "Custom Paths", "y270 w600 h90").Value
+    ; Reset FileManager at the start
+    FileManager.Reset()
 
     selectedFolders := []
+    createBlend := false
     createPureRef := false
     createpostproc := false
-    createBlend := false
+    createdFolders := []
+    errors := []
 
     ; Collect selected folders
     for index, folder in folders {
         if (bFiles["Folder" index].Value) {
             selectedFolders.Push(folder.name)
+            if (folder.name == "a_blend")
+                createBlend := true
             if (folder.name == "b_ref")
                 createPureRef := true
             if (folder.name == "d_postproc")
                 createpostproc := true
-            if (folder.name == "a_blend")
-                createBlend := true
         }
     }
 
+    ; Validate folder selection
     if (selectedFolders.Length == 0) {
         ShowError("selectedFolders.Length", "Please select at least one folder to create.", window_width + 240, window_height + 118)
         return
     }
 
-    ; Get custom paths from the Edit control
-    customPaths := StrSplit(customPaths, ",")
+    ; Keep track of paths
+    paths := []
+    
+    ; Continue asking for paths until user cancels
+    while true {
+        customPath := InputBox("Enter a directory path (Cancel to finish):", "Custom Path " paths.Length + 1, "y270 w600 h90")
+        
+        if (customPath.Result = "Cancel")
+            break
+            
+        path := Trim(customPath.Value)
+        if (path = "") {
+            ShowError("EmptyPath", "Path cannot be empty.", window_width + 240, window_height + 118)
+            continue
+        }
 
-    if (customPaths.Length == 0) {
-        ShowError("customPaths.Length", "Please enter at least one path.", window_width + 240, window_height + 118)
-        return
-    }
+        ; Get filename for this specific path
+        if !FileManager.GetFileName(path, true)  ; Force new filename input for each path
+            continue
+        
+        paths.Push(path)
+        
+        ; Create folders and files for this path
+        for folder in selectedFolders {
+            fullPath := path "\" folder
 
-    createdFolders := []
-    errors := []
+            try {
+                DirCreate(fullPath)
+                createdFolders.Push(fullPath)
 
-    for path in customPaths {
-        path := Trim(path)
-        if (path != "") {
-            for folder in selectedFolders {
-                fullPath := path "\" folder
-
-                try {
-                    DirCreate(fullPath)
-                    createdFolders.Push(fullPath)
-
-                    ; Create blend file if a_blend was selected
-                    if (folder == "a_blend" && createBlend) {
-                        CreateNewBlendFile(fullPath)
-                    }
-
-                    ; Create PureRef file if b_ref was selected
-                    if (folder == "b_ref" && createPureRef) {
-                        CreatePureRefFile(fullPath)
-                    }
-
-                    ; Create postproc file if d_postproc was selected
-                    if (folder == "d_postproc" && createpostproc) {
-                        CreatePostProcessingFile(fullPath)
-                    }
-                }
-                catch as err {
-                    errors.Push("Error creating " fullPath ": " err.Message)
-                }
+                ; Create specific files based on folder type
+                if (folder == "a_blend" && createBlend)
+                    CreateNewBlendFile(fullPath, path)
+                
+                if (folder == "b_ref" && createPureRef)
+                    CreatePureRefFile(fullPath, path)
+                
+                if (folder == "d_postproc" && createpostproc)
+                    CreatePostProcessingFile(fullPath, path)
+            }
+            catch as err {
+                errors.Push("Error creating " fullPath ": " err.Message)
             }
         }
     }
 
-    ; Prepare result message
+    ; Validate paths
+    if (paths.Length == 0) {
+        ShowError("NoPaths", "No paths were entered.", window_width + 240, window_height + 118)
+        return
+    }
+
+    ; Prepare and show result message
     resultMsg := "Results:`n`n"
     if (createdFolders.Length > 0)
         resultMsg .= "Created folders:`n" StrJoin(createdFolders, "`n") "`n`n"
     if (errors.Length > 0)
         resultMsg .= "Errors:`n" StrJoin(errors, "`n")
 
-    ; Show result
     ShowResult("Created F&F", resultMsg, "Center", "Center")
-
-    ; Terminate the script
     ExitApp()
 }
 
-; Create a new blend file
-CreateNewBlendFile(dirPath) {
+; Create new blend file
+CreateNewBlendFile(dirPath, basePath) {
     NBF_msgPositionY := window_height + 118
     NBF_msgPositionX := window_width + 240
 
@@ -386,12 +386,9 @@ CreateNewBlendFile(dirPath) {
     DirCreate(dirPath "\assests")
     DirCreate(dirPath "\textures")
 
-    if !FileManager.GetFileName()
-        return
-
     if FileExist(BLEND_FILE) {
         try {
-            FileCopy BLEND_FILE, dirPath "\" FileManager.fileName ".blend"
+            FileCopy BLEND_FILE, dirPath "\" FileManager.GetCurrentFileName(basePath) ".blend"
             ShowResult("CreateNewBlendFile", "File created successfully!", NBF_msgPositionX, NBF_msgPositionY)
         } catch Error as err {
             ShowResult("CreateNewBlendFile", "Error copying file: " err.Message, NBF_msgPositionX, NBF_msgPositionY)
@@ -401,23 +398,14 @@ CreateNewBlendFile(dirPath) {
     }
 }
 
-; Create a PureRef file
-CreatePureRefFile(dirPath) {
+; Create pure ref file
+CreatePureRefFile(dirPath, basePath) {
     PRF_msgPositionX := window_width + 240
     PRF_msgPositionY := window_height + 118 + 92
 
-    if !FileManager.GetFileName()
-        return
-
-    /*
-    Construct the full path of the file to be created
-    ! Deprecated method, do not use
-    ! filePath := dirPath "\" refName.Value "Scene.pur"
-    */
-
     if FileExist(REFERENCE_FILE) {
         try {
-            FileCopy REFERENCE_FILE, dirPath "\" FileManager.fileName "Scene.pur"
+            FileCopy REFERENCE_FILE, dirPath "\" FileManager.GetCurrentFileName(basePath) "Scene.pur"
             ShowResult("CreatePureRefFile", "File created successfully!", PRF_msgPositionX, PRF_msgPositionY)
         } catch Error as err {
             ShowError("CreatePureRefFile", "Error copying file: " err.Message, PRF_msgPositionX, PRF_msgPositionY)
@@ -425,42 +413,10 @@ CreatePureRefFile(dirPath) {
     } else {
         ShowError("CreatePureRefFile", "Source file doesn't exist!", PRF_msgPositionX, PRF_msgPositionY)
     }
-
-    /*
-    ; Use FileAppend to create the file
-    ! Deprecated method, do not use
-    ! try {
-    !     FileAppend("", filePath)
-    !     TraySetIcon (FF_INFO)
-    !     msg := CustomMsgBox()
-    !     msg.SetText("CreatePureRefFile", "File created: " filePath "Successfully.")
-    !     msg.SetPosition(window_width + 80, window_height + 118)
-    !     msg.SetColorScheme("Success")
-    !     msg.SetOptions("ToolWindow", "AlwaysOnTop")
-    !     msg.SetCloseTimer(0.5)
-    !     msg.Show()
-    !     ; MsgBox("File created: " filePath, "Success", "T1 64")
-    !     TraySetIcon (FF_CREATION)
-    !     bFiles.Destroy()
-    ! }
-    ! catch as err {
-    !     TraySetIcon (FF_ERROR)
-    !     msg := CustomMsgBox()
-    !     msg.SetText("CreatePureRefFile", "Error creating PureRef file: " err.Message "Error")
-    !     msg.SetPosition(window_width + 240, window_height + 118)
-    !     msg.SetColorScheme("Error")
-    !     msg.SetOptions("ToolWindow", "AlwaysOnTop")
-    !     msg.SetCloseTimer(1)
-    !     msg.Show()
-    !     ; MsgBox("Error creating PureRef file: " err.Message, "Error", "48")
-    !     TraySetIcon (FF_CREATION)
-    !     ; bFiles.Destroy()
-    ! }
-    */
 }
 
-; Create a PostProcessing file
-CreatePostProcessingFile(dirPath) {
+; Create a post-processing blend file
+CreatePostProcessingFile(dirPath, basePath) {
     PPF_msgPositionX := window_width + 240
     PPF_msgPositionY := window_height + 118 + 92 + 114
 
