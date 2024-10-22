@@ -4,14 +4,14 @@
  * @author Aaqil Ilyas
  * @link (https://github.com/Aaqil101/FF-Creation/blob/master/Lib/FileManager.ahk)
  * @created 2024-10-20
- * @version 2.5.0
+ * @version 3.0.0
  **************************************************************************/
 
 #Include CursorHandler.ahk
 #Include CustomMsgbox.ahk
 
 WINDOW_WIDTH := 250
-WINDOW_HEIGHT := 280
+WINDOW_HEIGHT := 320
 FF_CREATION := A_ScriptDir "\Lib\Icons\FF_Creation.png"
 FF_ERROR := A_ScriptDir "\Lib\Icons\FF_Error.png"
 
@@ -43,13 +43,13 @@ class FileManager {
         }
 
         ; Show input box
-        fileName := InputBox("Please enter a File Name.", "File Name", "y720 w250 h100")
+        fileName := InputBox("Please enter a File Name.", "File Name", "y730 w250 h100")
         
         if (fileName.Result = "Cancel") {
             TraySetIcon(FF_ERROR)
             msg := CustomMsgBox()
             msg.SetText("Operation cancelled", "File Name Input Cancelled.")
-            msg.SetPosition(WINDOW_WIDTH + 240, WINDOW_HEIGHT + 118)
+            msg.SetPosition(WINDOW_WIDTH + 240, WINDOW_HEIGHT + 78)
             msg.SetColorScheme("Error")
             msg.SetOptions("ToolWindow", "AlwaysOnTop")
             msg.SetCloseTimer(1)

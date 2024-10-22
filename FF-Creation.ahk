@@ -5,7 +5,7 @@
  * @author Aaqil Ilyas
  * @link (https://github.com/Aaqil101/FF-Creation)
  * @created 2024-10-20
- * @version 2.5.0
+ * @version 3.0.0
  * @copyright 2024 Aaqil Ilyas
  **************************************************************************/
 
@@ -86,7 +86,7 @@ folders := [
 ]
 
 ; Create a GUI for folder selection
-bFiles := GuiExt("-Caption +Border")
+bFiles := GuiExt("AlwaysOnTop -Caption +Border")
 FrameShadow(bFiles.Hwnd)
 
 ; Add title bar icon
@@ -308,7 +308,7 @@ CreateInSelectedFolders(*) {
 
     ; Validate folder selection
     if (selectedFolders.Length == 0) {
-        ShowError("selectedFolders.Length", "Please select at least one folder to create.", window_width + 240, window_height + 118)
+        ShowError("selectedFolders.Length", "Please select at least one folder to create.")
         return
     }
 
@@ -388,7 +388,7 @@ CreateInCustomPaths(*) {
 
     ; Validate folder selection
     if (selectedFolders.Length == 0) {
-        ShowError("selectedFolders.Length", "Please select at least one folder to create.", window_width + 240, window_height + 118)
+        ShowError("selectedFolders.Length", "Please select at least one folder to create.")
         return
     }
 
@@ -404,7 +404,7 @@ CreateInCustomPaths(*) {
 
         path := Trim(customPath.Value)
         if (path = "") {
-            ShowError("EmptyPath", "Path cannot be empty.", window_width + 240, window_height + 118)
+            ShowError("EmptyPath", "Path cannot be empty.")
             continue
         }
 
@@ -442,7 +442,7 @@ CreateInCustomPaths(*) {
 
     ; Validate paths
     if (paths.Length == 0) {
-        ShowError("NoPaths", "No paths were entered.", window_width + 240, window_height + 118)
+        ShowError("NoPaths", "No paths were entered.")
         return
     }
 
@@ -459,8 +459,8 @@ CreateInCustomPaths(*) {
 
 ; Create new blend file
 CreateNewBlendFile(dirPath, basePath) {
-    NBF_msgPositionY := window_height + 118
     NBF_msgPositionX := window_width + 240
+    global NBF_msgPositionY := window_height + 78
 
     ; Create two subfolders
     DirCreate(dirPath "\assests")
@@ -481,7 +481,7 @@ CreateNewBlendFile(dirPath, basePath) {
 ; Create pure ref file
 CreatePureRefFile(dirPath, basePath) {
     PRF_msgPositionX := window_width + 240
-    PRF_msgPositionY := window_height + 118 + 92
+    global PRF_msgPositionY := NBF_msgPositionY + 92
 
     if FileExist(REFERENCE_FILE) {
         try {
@@ -498,7 +498,7 @@ CreatePureRefFile(dirPath, basePath) {
 ; Create a post-processing blend file
 CreatePostProcessingFile(dirPath, basePath) {
     PPF_msgPositionX := window_width + 240
-    PPF_msgPositionY := window_height + 118 + 92 + 114
+    PPF_msgPositionY := PRF_msgPositionY + 114
 
     ; Create a subfolder
     DirCreate(dirPath "\assests")
@@ -515,7 +515,7 @@ CreatePostProcessingFile(dirPath, basePath) {
     }
 }
 
-ShowError(title, message, msgX, msgY) {
+ShowError(title, message, msgX := window_width + 240, msgY := window_height + 78) {
     TraySetIcon (FF_ERROR)
     msg := CustomMsgBox()
     msg.SetText(title, message)
