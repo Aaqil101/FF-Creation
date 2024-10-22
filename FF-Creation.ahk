@@ -53,8 +53,8 @@ SetDefaultMouseSpeed 0
 
 WINDOW_WIDTH := 250
 WINDOW_HEIGHT := 280
-SuccessTimer := 60
-ErrorTimer := 60
+SuccessTimer := 0.5
+ErrorTimer := 1
 FF_CREATION := A_ScriptDir "\Lib\Icons\FF_Creation.png"
 FF_ERROR := A_ScriptDir "\Lib\Icons\FF_Error.png"
 FF_INFO := A_ScriptDir "\Lib\Icons\FF_Info.png"
@@ -236,9 +236,11 @@ CreateInSelectedFolders(*) {
         return
     }
 
-    ; Get filename for all files
-    if !FileManager.GetFileName()
-        return
+    ; Only get filename if a_blend or b_ref is selected
+    if (createBlend || createPureRef) {
+        if !FileManager.GetFileName()
+            return
+    }
 
     ; Ask the user where to create the folders
     selectedPath := FileSelect("D", A_Desktop, "Select where to create the folders")
@@ -330,9 +332,11 @@ CreateInCustomPaths(*) {
             continue
         }
 
-        ; Get filename for this specific path
-        if !FileManager.GetFileName(path, true)  ; Force new filename input for each path
-            continue
+        ; Only get filename if a_blend or b_ref is selected
+        if (createBlend || createPureRef) {
+            if !FileManager.GetFileName(path, true)  ; Force new filename input for each path
+                continue
+        }
         
         paths.Push(path)
         
