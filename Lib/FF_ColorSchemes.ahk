@@ -1,5 +1,6 @@
-class ColorSchemes {
-    static Schemes := [
+class FF_ColorSchemes {
+    ;There are 21 themes in this file.
+    static FF_Schemes := [
         {   ; Red theme
             name: "Red",
             bg: "331111",
@@ -111,144 +112,138 @@ class ColorSchemes {
         {   ; Nord Dark
             name: "Nord Dark",
             bg: "2E3440",
-            font: "ECEFF4",
+            font: "ffffff",
             btn: "5E81AC"
         },
         {   ; Dracula
             name: "Dracula",
             bg: "282A36",
-            font: "F8F8F2",
+            font: "ffffff",
             btn: "BD93F9"
         },
         {   ; Monokai Pro
             name: "Monokai Pro",
             bg: "2D2A2E",
-            font: "FCFCFA",
+            font: "ffffff",
             btn: "FFD866"
         },
         {   ; Tokyo Night
             name: "Tokyo Night",
             bg: "1A1B26",
-            font: "A9B1D6",
+            font: "ffffff",
             btn: "7AA2F7"
-        },
-        {   ; Cyberpunk
-            name: "Cyberpunk",
-            bg: "2B213A",
-            font: "FF0055",
-            btn: "00FF9F"
         },
         {   ; Catppuccin Mocha
             name: "Catppuccin",
             bg: "1E1E2E",
-            font: "CDD6F4",
+            font: "ffffff",
             btn: "89B4FA"
         },
         {   ; Synthwave
             name: "Synthwave",
             bg: "2B213A",
-            font: "FF7EDB",
+            font: "ffffff",
             btn: "00FF9F"
         },
         {   ; One Dark Pro
             name: "One Dark",
             bg: "282C34",
-            font: "ABB2BF",
+            font: "ffffff",
             btn: "98C379"
         },
         {   ; GitHub Dark
             name: "GitHub Dark",
             bg: "0D1117",
-            font: "C9D1D9",
+            font: "ffffff",
             btn: "58A6FF"
         },
         {   ; Gruvbox Dark
             name: "Gruvbox",
             bg: "282828",
-            font: "EBDBB2",
+            font: "ffffff",
             btn: "B8BB26"
         },
         {   ; Material Ocean
             name: "Ocean",
             bg: "0F111A",
-            font: "8F93A2",
+            font: "ffffff",
             btn: "84FFFF"
         },
         {   ; Palenight
             name: "Palenight",
             bg: "292D3E",
-            font: "BFC7D5",
+            font: "ffffff",
             btn: "82AAFF"
         },
         {   ; Rose Pine
             name: "Rose Pine",
             bg: "191724",
-            font: "E0DEF4",
+            font: "ffffff",
             btn: "EBBCBA"
         },
         {   ; Ayu Dark
             name: "Ayu",
             bg: "0A0E14",
-            font: "B3B1AD",
+            font: "ffffff",
             btn: "FFB454"
         },
         {   ; Eva Dark
             name: "Eva Dark",
             bg: "2A3B4D",
-            font: "7FD1FF",
+            font: "ffffff",
             btn: "FF61C6"
         },
         {   ; Outrun Dark
             name: "Outrun",
             bg: "00002A",
-            font: "FF00FF",
+            font: "ffffff",
             btn: "00FFFF"
         },
         {   ; Carbon
             name: "Carbon",
             bg: "161616",
-            font: "F4F4F4",
+            font: "ffffff",
             btn: "78A9FF"
         },
         {   ; Moonlight
             name: "Moonlight",
             bg: "1E2030",
-            font: "C8D3F5",
+            font: "ffffff",
             btn: "82AAFF"
         },
         {   ; Horizon
             name: "Horizon",
             bg: "1C1E26",
-            font: "E0E0E0",
+            font: "ffffff",
             btn: "E95678"
         },
         {   ; Night Owl
             name: "Night Owl",
             bg: "011627",
-            font: "D6DEEB",
+            font: "ffffff",
             btn: "7FDBCA"
         },
         {   ; Material Deep Ocean
             name: "Deep Ocean",
             bg: "0F111A",
-            font: "A6ACCD",
+            font: "ffffff",
             btn: "84FFFF"
         }
     ]
 
     ; Method to get scheme by name
     static GetSchemeByName(name) {
-        for scheme in this.Schemes {
+        for scheme in this.FF_Schemes {
             if (scheme.name = name)
                 return scheme
         }
-        return this.Schemes[1]  ; Return first scheme if not found
+        return this.FF_Schemes[1]  ; Return first scheme if not found
     }
 
     ; Method to get scheme names
     static GetSchemeNames() {
         names := []
-        for scheme in this.Schemes
+        for scheme in this.FF_Schemes
             names.Push(scheme.name)
         return names
     }

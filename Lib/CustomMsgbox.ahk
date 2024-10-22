@@ -27,7 +27,7 @@
 
 #Include GuiEnhancerKit.ahk
 #Include ColorButton.ahk
-#Include ColorSchemes.ahk
+#Include CMB_ColorSchemes.ahk
 
 class CustomMsgBox {
     ; Add these constants at the top of the CustomMsgBox class

@@ -42,6 +42,8 @@ SetDefaultMouseSpeed 0
 
 * Include the FileManager library, which allows you to create input boxes.
 * For more information, see https://github.com/Aaqil101/FF-Creation/blob/master/Lib/FileManager.ahk
+
+* Include the FF_ColorSchemes library, which allows you to create custom color schemes.
 */
 
 #Include Lib\GuiEnhancerKit.ahk
@@ -50,9 +52,10 @@ SetDefaultMouseSpeed 0
 #Include Lib\CursorHandler.ahk
 #Include Lib\CustomMsgbox.ahk
 #Include Lib\FileManager.ahk
+#Include Lib\FF_ColorSchemes.ahk
 
 WINDOW_WIDTH := 250
-WINDOW_HEIGHT := 280
+WINDOW_HEIGHT := 320
 SuccessTimer := 0.5
 ErrorTimer := 1
 FF_CREATION := A_ScriptDir "\Lib\Icons\FF_Creation.png"
@@ -63,40 +66,65 @@ POST_PROCESSING := A_ScriptDir "\Lib\Sources\post-processing.blend"
 REFERENCE_FILE := A_ScriptDir "\Lib\Sources\NewScene.pur"
 BLEND_FILE := A_ScriptDir "\Lib\Sources\NewBlenderProjects.blend"
 
-; Add Color Scheme
-CustomMsgBox.AddColorScheme("Error", "FF0000", "FFFFFF", "d46666")
-CustomMsgBox.AddColorScheme("Success", "E8F5E9", "1B5E20", "4CAF50")
+; Set the title for the tray menu
+A_IconTip := "FF-Creation"
 
-TraySetIcon (FF_CREATION)
+; Set the icon for the tray menu
+TraySetIcon(FF_CREATION)
 
 ; Define the folder names and their default states
 folders := [
-    { name: "a_blend", default: true },
-    { name: "b_ref", default: true },
-    { name: "c_previs", default: true },
-    { name: "d_postproc", default: false },
-    { name: "d_martiniShot", default: false },
-    { name: "e_videdit", default: false },
-    { name: "e_martiniShot", default: false },
-    { name: "f_finalTouch", default: false },
-    { name: "g_martiniShot", default: false }
+    {name: "a_blend", default: true},
+    {name: "b_ref", default: true},
+    {name: "c_previs", default: true},
+    {name: "d_postproc", default: false},
+    {name: "d_martiniShot", default: false},
+    {name: "e_videdit", default: false},
+    {name: "e_martiniShot", default: false},
+    {name: "f_finalTouch", default: false},
+    {name: "g_martiniShot", default: false}
 ]
 
 ; Create a GUI for folder selection
-bFiles := GuiExt(, "F&F Creation")
+bFiles := GuiExt("-Caption +Border")
+FrameShadow(bFiles.Hwnd)
+
+; Add title bar icon
+bFiles.AddPicture("x10 y5 w30 h30", FF_CREATION)
+
+; Add title bar
+bFiles.SetFont("s12 Bold cwhite", "Segoe UI")
+bFiles.AddText("x45 y12 h30", "FF-Creation")
+
 bFiles.SetFont("s10 Bold cwhite", "JetBrains Mono")
-bFiles.SetDarkTitle()
-bFiles.SetDarkMenu()
-bFiles.AddText("x10 y5 w280", "Select The Folders To Create:")
+bFiles.AddText("x10 y40 w280", "Select The Folders To Create:")
 bFiles.OnEvent("Close", (*) => ExitApp())
 
-; Set the background color of the GUI window
-bFiles.BackColor := "313131"
+; Select random scheme at startup
+randomScheme := FF_ColorSchemes.FF_Schemes[Random(1, FF_ColorSchemes.FF_Schemes.Length)]
+; Msgbox(randomScheme.name, "Random Color Scheme")
+
+
+; Function to update GUI colors
+UpdateColors(scheme) {
+    bgColor := scheme.bg
+    fontColor := scheme.font
+    btnColor := scheme.btn
+
+    ; Update GUI background
+    bFiles.BackColor := bgColor
+
+    ; Update button colors
+    button1.SetColor(btnColor, fontColor, 0, 0, 9)
+    button2.SetColor(btnColor, fontColor, 0, 0, 9)
+    minimizeBtn.setColor("808080", fontColor, 0, 0, 9)
+    closeBtn.SetColor("aa2031", fontColor, 0, 0, 9)
+}
 
 ; Add checkboxes for each folder
 for index, folder in folders {
     /* m := Map()
-    m["Value0DisabledIcon"]:=m["Value1DisabledIcon"]:="Lib\Icons\SW_Value0DisabledIcon.png"
+    m["Value0DisabledIcon"] := m["Value1DisabledIcon"] := "Lib\Icons\SW_Value0DisabledIcon.png"
     m["Value1Icon"] := "Lib\Icons\SW_Value1Icon.png"
     m["Value0Icon"] := "Lib\Icons\SW_Value0Icon.png" */
 
@@ -128,17 +156,65 @@ for index, folder in folders {
     ; The text on the button is the name of the folder
     ; The initial state of the button is set to the value of the "checked" variable
     ; The style of the button is set to the style defined in the "m" variable
-    bFiles.AddPicSwitch("x9.5 y" (22 + (index - 1) * 22) " w280 vFolder" index, folder.name, checked, m)
+    bFiles.AddPicSwitch("x10 y" (62 + (index - 1) * 22) " w280 vFolder" index, folder.name, checked, m)
 }
 
 ; Add a button to create selected folders
-button1 := bFiles.AddButton("x10 y" (45 + folders.Length * 20) " w100", "One Directory")
-button1.SetColor("008080", "FBFADA", 0, 0, 9)
+button1 := bFiles.AddButton("x10 y" (85 + folders.Length * 20) " w100", "One Directory")
 button1.OnEvent("Click", CreateInSelectedFolders.Bind("Normal"))
 
-button2 := bFiles.AddButton("x+10 y" (45 + folders.Length * 20) " w100", "Multiple Directories")
-button2.SetColor("80001c", "FBFADA", 0, 0, 9)
+button2 := bFiles.AddButton("x+10 y" (85 + folders.Length * 20) " w120", "Multiple Directories")
 button2.OnEvent("Click", CreateInCustomPaths.Bind("Normal"))
+
+minimizeBtn := bFiles.AddButton("x175 y8 w30", "➖")
+minimizeBtn.OnEvent("Click", (*) => WinMinimize())
+
+closeBtn := bFiles.AddButton("x210 y8 w30", "✖")
+closeBtn.OnEvent("Click", (*) => ExitApp())
+
+
+; Enable window dragging
+OnMessage(0x0201, WM_LBUTTONDOWN)
+
+FrameShadow(HGui) {
+    ; Check if DWM composition is enabled
+    _ISENABLED := 0
+    DllCall("dwmapi\DwmIsCompositionEnabled", "Int*", &_ISENABLED)
+
+    if !_ISENABLED {
+        ; If DWM is not enabled, create basic shadow
+        DllCall("SetClassLong", "Ptr", HGui, "Int", -26, "Int", DllCall("GetClassLong", "Ptr", HGui, "Int", -26) | 0x20000)
+    } else {
+        ; Create DWM shadow
+        _MARGINS := Buffer(16, 0)
+        NumPut("UInt", 1, _MARGINS, 0)
+        NumPut("UInt", 1, _MARGINS, 4)
+        NumPut("UInt", 1, _MARGINS, 8)
+        NumPut("UInt", 1, _MARGINS, 12)
+
+        DllCall("dwmapi\DwmSetWindowAttribute",
+            "Ptr", HGui,
+            "UInt", 2,
+            "Int*", 2,
+            "UInt", 4)
+
+        DllCall("dwmapi\DwmExtendFrameIntoClientArea",
+            "Ptr", HGui,
+            "Ptr", _MARGINS)
+    }
+}
+
+WM_LBUTTONDOWN(wParam, lParam, msg, hwnd) {
+    PostMessage(0xA1, 2, , , "A")
+}
+
+/** 👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼👆🏼 */
+
+; Initial color scheme application
+UpdateColors(randomScheme)
+
+; Add ESC key handling
+bFiles.OnEvent("Escape", (*) => bFiles.Destroy())
 
 ; Show the GUI
 bFiles.Show("x0 y0 w" window_width " h" window_height " Center")
@@ -260,10 +336,10 @@ CreateInSelectedFolders(*) {
                 ; Create specific files based on folder type
                 if (folder == "a_blend" && createBlend)
                     CreateNewBlendFile(fullPath, selectedPath)
-                
+
                 if (folder == "b_ref" && createPureRef)
                     CreatePureRefFile(fullPath, selectedPath)
-                
+
                 if (folder == "d_postproc" && createpostproc)
                     CreatePostProcessingFile(fullPath, selectedPath)
             }
@@ -318,14 +394,14 @@ CreateInCustomPaths(*) {
 
     ; Keep track of paths
     paths := []
-    
+
     ; Continue asking for paths until user cancels
     while true {
         customPath := InputBox("Enter a directory path (Cancel to finish):", "Custom Path " paths.Length + 1, "y270 w600 h90")
-        
+
         if (customPath.Result = "Cancel")
             break
-            
+
         path := Trim(customPath.Value)
         if (path = "") {
             ShowError("EmptyPath", "Path cannot be empty.", window_width + 240, window_height + 118)
@@ -337,9 +413,9 @@ CreateInCustomPaths(*) {
             if !FileManager.GetFileName(path, true)  ; Force new filename input for each path
                 continue
         }
-        
+
         paths.Push(path)
-        
+
         ; Create folders and files for this path
         for folder in selectedFolders {
             fullPath := path "\" folder
@@ -351,10 +427,10 @@ CreateInCustomPaths(*) {
                 ; Create specific files based on folder type
                 if (folder == "a_blend" && createBlend)
                     CreateNewBlendFile(fullPath, path)
-                
+
                 if (folder == "b_ref" && createPureRef)
                     CreatePureRefFile(fullPath, path)
-                
+
                 if (folder == "d_postproc" && createpostproc)
                     CreatePostProcessingFile(fullPath, path)
             }
