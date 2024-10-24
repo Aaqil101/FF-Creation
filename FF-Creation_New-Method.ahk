@@ -72,6 +72,8 @@ TraySetIcon(FF_CREATION)
 
 ffcreation := GuiExt("AlwaysOnTop -Caption")
 
+ffcreation.BackColor := "535353"
+
 ; Add ESC key handling
 ffcreation.OnEvent("Escape", (*) => ffcreation.Destroy())
 
