@@ -57,13 +57,22 @@ WINDOW_WIDTH := 350
 SuccessTimer := 0.5
 ErrorTimer := 1
 
-; Buttons Variables
+
+; Low, Medium And High Buttons Variables
 BTNX := 150
 BTN_HIGH_Y := 120
-BTNWIDTH := 200
+BTNWIDTH := 215
 BTNHIEGHT := 30
 STAPS_MEDIUM := 60
 STAPS_LOW := 120
+LMH_BTN_COLOR := "20aa31"
+BTN_TEXT := "ffffff"
+
+; Close Button Variables
+CLOSE_BTN_Y := 10
+CLS_MIN_BTN_X := 260
+CLS_MIN_W_H := " w80 h25"
+
 
 ; Paths Variables
 FF_CREATION := A_ScriptDir "\Lib\Icons\FF_Creation.png"
@@ -83,21 +92,40 @@ TraySetIcon(FF_CREATION)
 ffcreation := GuiExt("AlwaysOnTop -Caption +Border")
 
 ; Set the background color
-ffcreation.BackColor := "535353"
+ffcreation.BackColor := "113311"
 
+; Set the font for the button to Segoe UI size 12
 ffcreation.SetFont("s12", "Segoe UI")
-BUTTONHIGH := ffcreation.AddButton("x" BTNX " y" BTN_HIGH_Y " w" BTNWIDTH " h" BTNHIEGHT, "🔺")
-BUTTONHIGH.SetColor("8c00ff", "ff0000", 0, 0, 9)
 
-ffcreation.SetFont("s12", "Courier New")
-BUTTONMEDIUM := ffcreation.AddButton("x" BTNX + STAPS_MEDIUM " y" BTN_HIGH_Y + STAPS_MEDIUM " w" BTNWIDTH - STAPS_MEDIUM " h" BTNHIEGHT, "⏫")
-BUTTONMEDIUM.SetColor("ca8063", "0078d7", 0, 0, 9)
+; Add the "High" button
+; The button has a red background color and white text color
+BUTTONHIGH := ffcreation.AddButton("x" BTNX " y" BTN_HIGH_Y " w" BTNWIDTH " h" BTNHIEGHT, "High")
+BUTTONHIGH.SetColor(LMH_BTN_COLOR, BTN_TEXT, 0, 0, 9)
 
-ffcreation.SetFont("s12", "Helvetica")
-BUTTONLOW := ffcreation.AddButton("x" BTNX + STAPS_LOW " y" BTN_HIGH_Y + STAPS_LOW " w" BTNWIDTH - STAPS_LOW " h" BTNHIEGHT, "⏺")
-BUTTONLOW.SetColor("ca8063", "0078d7", 0, 0, 9)
+; Add the "Medium" button
+; Set the button color to red with white text, and rounded corners
+ffcreation.SetFont("s12", "Segoe UI")
+BUTTONMEDIUM := ffcreation.AddButton("x" BTNX + STAPS_MEDIUM " y" BTN_HIGH_Y + STAPS_MEDIUM " w" BTNWIDTH - STAPS_MEDIUM " h" BTNHIEGHT, "Medium")
+BUTTONMEDIUM.SetColor(LMH_BTN_COLOR, BTN_TEXT, 0, 0, 9)
+
+; Add the "Low" button
+; Set the button color to red with white text, and rounded corners
+ffcreation.SetFont("s12", "Segoe UI")
+BUTTONLOW := ffcreation.AddButton("x" BTNX + STAPS_LOW " y" BTN_HIGH_Y + STAPS_LOW " w" BTNWIDTH - STAPS_LOW " h" BTNHIEGHT, "Low")
+BUTTONLOW.SetColor(LMH_BTN_COLOR, BTN_TEXT, 0, 0, 9)
+
+CLOSEBTN := ffcreation.AddButton("x" CLS_MIN_BTN_X " y" CLOSE_BTN_Y CLS_MIN_W_H, "✖")
+CLOSEBTN.setColor("ff0000", BTN_TEXT, 0, 0, 9)
+CLOSEBTN.OnEvent("Click", (*) => ExitApp())
+
+MINIMIZEBTN := ffcreation.AddButton("x" CLS_MIN_BTN_X - 250 " y" CLOSE_BTN_Y CLS_MIN_W_H, "➖")
+MINIMIZEBTN.setColor("636363", BTN_TEXT, 0, 0, 9)
+MINIMIZEBTN.OnEvent("Click", (*) => WinMinimize())
+
+
+; title := ffcreation.AddText("x" 5 " y" 5 " w" WINDOW_WIDTH - 10 " h" 30, "FF-Creation")
 
 ; Add ESC key handling
-ffcreation.OnEvent("Escape", (*) => ExitApp())
+ffcreation.OnEvent("Escape", (*) => ffcreation.Destroy())
 
 ffcreation.Show("h" WINDOW_HEIGHT " w" WINDOW_WIDTH " center")
