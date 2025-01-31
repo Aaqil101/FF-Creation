@@ -5,7 +5,7 @@
  * @author Aaqil Ilyas
  * @link (https://github.com/Aaqil101/FF-Creation)
  * @created 2024-10-20
- * @version 1.0.0
+ * @version 1.5.0
  * @copyright 2024 Aaqil Ilyas
  **************************************************************************/
 
